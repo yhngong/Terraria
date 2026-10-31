@@ -187,7 +187,46 @@ export const BOSS_CATALOG: BossCatalogEntry[] = [
     hardmode: true,
     summonItem: 'celestial_sigil',
     biomeHint: 'Endgame Celestial Event',
-    dropsSummary: 'Meowmere, S.D.M.G., Last Prism, Luminite Bars'
+    dropsSummary: 'Zenith, Meowmere, S.D.M.G., Last Prism, Luminite Bars'
+  },
+  // =========================================================
+  // CALAMITY MOD POST-MOON LORD BOSSES (Tiers 15..18)
+  // =========================================================
+  {
+    id: 'providence',
+    name: 'Providence, the Profaned Goddess [Calamity]',
+    tier: 15,
+    hardmode: true,
+    summonItem: 'profaned_core',
+    biomeHint: 'The Hallow / The Underworld (Post-Moon Lord)',
+    dropsSummary: 'Unholy Essence, Blossom Pickaxe, Tarragon Armor, Omega Healing Potions'
+  },
+  {
+    id: 'devourer_of_gods',
+    name: 'The Devourer of Gods [Calamity]',
+    tier: 16,
+    hardmode: true,
+    summonItem: 'cosmic_worm',
+    biomeHint: 'Cosmic Skies (Post-Providence)',
+    dropsSummary: 'Cosmilite Bars, Excelsus, Genesis Pickaxe, God Slayer Armor'
+  },
+  {
+    id: 'yharon',
+    name: 'Yharon, Dragon of Rebirth [Calamity]',
+    tier: 17,
+    hardmode: true,
+    summonItem: 'blessed_phoenix_egg',
+    biomeHint: 'The Jungle / Arena Skies (Post-DoG)',
+    dropsSummary: "Auric Bars, Yharon Soul Fragments, Dragon's Rage, Drataliornus, Auric Tesla Armor"
+  },
+  {
+    id: 'supreme_calamitas',
+    name: 'Supreme Witch, Calamitas [Calamity]',
+    tier: 18,
+    hardmode: true,
+    summonItem: 'altar_of_accursed',
+    biomeHint: 'Brimstone Arena (Calamity Finale!)',
+    dropsSummary: 'Shadowspec Bars, Ark of the Cosmos, Crystyl Crusher, Soma Prime, Vehemence, Demonshade Armor'
   }
 ];
 
@@ -217,7 +256,7 @@ export class BossManager {
     player.hp = player.maxHp;
     player.mana = player.maxMana;
     player.potionCooldown = 0;
-    onChat('=== 14-BOSS RUSH STARTED! Wave 1/14: King Slime ===', '#ffd747');
+    onChat(`=== ${BOSS_CATALOG.length}-BOSS RUSH STARTED! Wave 1/${BOSS_CATALOG.length}: King Slime ===`, '#ffd747');
     this.summon(BOSS_CATALOG[0].id, player, audio, onChat);
   }
 
@@ -231,7 +270,7 @@ export class BossManager {
       return;
     }
     if (this.activeBoss) {
-      this.bossRushWave = Math.min(14, this.bossRushWave + 1);
+      this.bossRushWave = Math.min(BOSS_CATALOG.length, this.bossRushWave + 1);
     }
     this.bossRushCountdown = 0;
     const entry = BOSS_CATALOG[this.bossRushWave - 1];
@@ -241,7 +280,7 @@ export class BossManager {
       player.potionCooldown = 0;
       const upg = player.upgradeForBossRushWave(this.bossRushWave);
       if (upg) onChat(upg, '#05c8ff');
-      onChat(`=== BOSS RUSH WAVE ${this.bossRushWave}/14: ${entry.name} ===`, '#ffd747');
+      onChat(`=== BOSS RUSH WAVE ${this.bossRushWave}/${BOSS_CATALOG.length}: ${entry.name} ===`, '#ffd747');
       this.summon(entry.id, player, audio, onChat);
     }
   }
@@ -841,6 +880,95 @@ export class BossManager {
         );
         break;
       }
+      case 'providence': {
+        boss.title = 'Providence, the Profaned Goddess';
+        boss.subtitle = 'The Profaned Flame [Calamity]';
+        boss.tier = 15;
+        boss.isHardmode = true;
+        boss.parts.push({
+          id: nextPartId++,
+          name: 'Providence, the Profaned Goddess',
+          x: sx,
+          y: sy,
+          vx: 0,
+          vy: 0,
+          radius: 44,
+          hp: 58000,
+          maxHp: 58000,
+          defense: 36,
+          contactDamage: 78,
+          role: 'body'
+        });
+        break;
+      }
+      case 'devourer_of_gods': {
+        boss.title = 'The Devourer of Gods';
+        boss.subtitle = 'Scourge of the Cosmos [Calamity]';
+        boss.tier = 16;
+        boss.isHardmode = true;
+        const segCount = 26;
+        const sharedHp = 75000;
+        for (let i = 0; i < segCount; i++) {
+          boss.parts.push({
+            id: nextPartId++,
+            name: i === 0 ? 'Devourer of Gods Head' : i === segCount - 1 ? 'Devourer of Gods Tail' : 'Devourer Body',
+            x: sx - i * 24,
+            y: sy,
+            vx: 0,
+            vy: 0,
+            radius: i === 0 ? 28 : 22,
+            hp: sharedHp,
+            maxHp: sharedHp,
+            defense: i === 0 ? 28 : i === segCount - 1 ? 24 : 44,
+            contactDamage: i === 0 ? 92 : 68,
+            role: i === 0 ? 'head' : i === segCount - 1 ? 'tail' : 'body',
+            parentIndex: i - 1
+          });
+        }
+        break;
+      }
+      case 'yharon': {
+        boss.title = 'Yharon, Dragon of Rebirth';
+        boss.subtitle = 'Jungle Dragon [Calamity]';
+        boss.tier = 17;
+        boss.isHardmode = true;
+        boss.parts.push({
+          id: nextPartId++,
+          name: 'Yharon, Dragon of Rebirth',
+          x: sx,
+          y: sy,
+          vx: 0,
+          vy: 0,
+          radius: 46,
+          hp: 92000,
+          maxHp: 92000,
+          defense: 40,
+          contactDamage: 88,
+          role: 'body'
+        });
+        break;
+      }
+      case 'supreme_calamitas': {
+        boss.title = 'Supreme Witch, Calamitas';
+        boss.subtitle = 'The Brimstone Witch [Calamity]';
+        boss.tier = 18;
+        boss.isHardmode = true;
+        boss.parts.push({
+          id: nextPartId++,
+          name: 'Supreme Witch, Calamitas',
+          x: sx,
+          y: sy,
+          vx: 0,
+          vy: 0,
+          radius: 34,
+          hp: 110000,
+          maxHp: 110000,
+          defense: 44,
+          contactDamage: 90,
+          role: 'body'
+        });
+        break;
+      }
     }
 
     this.activeBoss = boss;
@@ -852,7 +980,7 @@ export class BossManager {
     const b = this.activeBoss;
     if (!b) return null;
 
-    if (b.type === 'wall_of_flesh' || b.type === 'the_destroyer') {
+    if (b.type === 'wall_of_flesh' || b.type === 'the_destroyer' || b.type === 'devourer_of_gods') {
       const main = b.parts[0];
       return {
         name: b.title,
@@ -903,7 +1031,7 @@ export class BossManager {
         if (this.bossRushCountdown <= 0) {
           const entry = BOSS_CATALOG[this.bossRushWave - 1];
           if (entry) {
-            onChat(`=== BOSS RUSH WAVE ${this.bossRushWave}/14: ${entry.name} ===`, '#ffd747');
+            onChat(`=== BOSS RUSH WAVE ${this.bossRushWave}/${BOSS_CATALOG.length}: ${entry.name} ===`, '#ffd747');
             this.summon(entry.id, player, audio, onChat);
           }
         }
@@ -970,13 +1098,33 @@ export class BossManager {
       case 'moon_lord':
         this.updateMoonLord(b, dt, player, projectiles, audio, particles);
         break;
+      case 'providence':
+        this.updateProvidence(b, dt, player, projectiles, audio, particles);
+        break;
+      case 'devourer_of_gods':
+        this.updateDevourerOfGods(b, dt, player, projectiles, audio, particles, onChat);
+        break;
+      case 'yharon':
+        this.updateYharon(b, dt, player, projectiles, audio, particles, onChat);
+        break;
+      case 'supreme_calamitas':
+        this.updateSupremeCalamitas(b, dt, player, projectiles, audio, particles);
+        break;
     }
 
     // Spawn afterimages for fast-moving boss parts
     for (const part of b.parts) {
       if (part.hp > 0 && Math.hypot(part.vx, part.vy) > 260) {
         const trailCol =
-          b.type === 'duke_fishron'
+          b.type === 'yharon'
+            ? '#ffaa00'
+            : b.type === 'devourer_of_gods'
+            ? '#ff29c6'
+            : b.type === 'providence'
+            ? '#ffd747'
+            : b.type === 'supreme_calamitas'
+            ? '#ff1938'
+            : b.type === 'duke_fishron'
             ? '#1cb3ff'
             : b.type === 'queen_bee'
             ? '#ffd747'
@@ -1098,7 +1246,7 @@ export class BossManager {
       for (const p of b.parts) {
         if (p.role !== 'hungry') p.hp -= dmg;
       }
-    } else if (b.type === 'the_destroyer') {
+    } else if (b.type === 'the_destroyer' || b.type === 'devourer_of_gods') {
       for (const p of b.parts) {
         p.hp -= dmg;
       }
@@ -1259,8 +1407,55 @@ export class BossManager {
         world.spawnDrop(dropX, dropY, 'last_prism', 1);
         world.spawnDrop(dropX, dropY, 'luminite_bar', 45);
         world.spawnDrop(dropX, dropY, 'solar_fragment', 45);
+        world.spawnDrop(dropX, dropY, 'profaned_core', 1);
         world.spawnDrop(dropX, dropY, 'super_healing_potion', 25);
-        onChat('Victory! You have conquered the Moon Lord and unlocked THE ZENITH!', '#05c8ff');
+        onChat('Victory! You have conquered the Moon Lord and unlocked THE ZENITH & Profaned Core!', '#05c8ff');
+        break;
+      case 'providence':
+        world.spawnDrop(dropX, dropY, 'unholy_essence', 35);
+        world.spawnDrop(dropX, dropY, 'blossom_pickaxe', 1);
+        world.spawnDrop(dropX, dropY, 'tarragon_helmet', 1);
+        world.spawnDrop(dropX, dropY, 'tarragon_breastplate', 1);
+        world.spawnDrop(dropX, dropY, 'tarragon_leggings', 1);
+        world.spawnDrop(dropX, dropY, 'cosmic_worm', 1);
+        world.spawnDrop(dropX, dropY, 'omega_healing_potion', 20);
+        onChat('Providence’s profaned flames subside... Tarragon Armor & Blossom Pickaxe dropped!', '#2bff6e');
+        break;
+      case 'devourer_of_gods':
+        world.spawnDrop(dropX, dropY, 'cosmilite_bar', 40);
+        world.spawnDrop(dropX, dropY, 'excelsus', 1);
+        world.spawnDrop(dropX, dropY, 'genesis_pickaxe', 1);
+        world.spawnDrop(dropX, dropY, 'god_slayer_helmet', 1);
+        world.spawnDrop(dropX, dropY, 'god_slayer_breastplate', 1);
+        world.spawnDrop(dropX, dropY, 'god_slayer_leggings', 1);
+        world.spawnDrop(dropX, dropY, 'blessed_phoenix_egg', 1);
+        world.spawnDrop(dropX, dropY, 'omega_healing_potion', 25);
+        onChat('The Devourer of Gods has been slain! Excelsus, Genesis Pickaxe & God Slayer Armor dropped!', '#ff29c6');
+        break;
+      case 'yharon':
+        world.spawnDrop(dropX, dropY, 'auric_bar', 45);
+        world.spawnDrop(dropX, dropY, 'yharon_soul_fragment', 25);
+        world.spawnDrop(dropX, dropY, 'dragon_rage', 1);
+        world.spawnDrop(dropX, dropY, 'phoenix_flame_blaster', 1);
+        world.spawnDrop(dropX, dropY, 'celestial_tracers', 1);
+        world.spawnDrop(dropX, dropY, 'auric_tesla_helmet', 1);
+        world.spawnDrop(dropX, dropY, 'auric_tesla_breastplate', 1);
+        world.spawnDrop(dropX, dropY, 'auric_tesla_leggings', 1);
+        world.spawnDrop(dropX, dropY, 'altar_of_accursed', 1);
+        world.spawnDrop(dropX, dropY, 'omega_healing_potion', 30);
+        onChat("Yharon, Dragon of Rebirth defeated! Dragon's Rage, Drataliornus & Auric Tesla Armor dropped!", '#ffaa00');
+        break;
+      case 'supreme_calamitas':
+        world.spawnDrop(dropX, dropY, 'shadowspec_bar', 50);
+        world.spawnDrop(dropX, dropY, 'ark_of_the_cosmos', 1);
+        world.spawnDrop(dropX, dropY, 'crystyl_crusher', 1);
+        world.spawnDrop(dropX, dropY, 'soma_prime', 1);
+        world.spawnDrop(dropX, dropY, 'vehemence', 1);
+        world.spawnDrop(dropX, dropY, 'demonshade_helmet', 1);
+        world.spawnDrop(dropX, dropY, 'demonshade_breastplate', 1);
+        world.spawnDrop(dropX, dropY, 'demonshade_leggings', 1);
+        world.spawnDrop(dropX, dropY, 'omega_healing_potion', 40);
+        onChat('SUPREME VICTORY! Supreme Witch, Calamitas conquered! Ark of the Cosmos, Crystyl Crusher & Demonshade Armor unlocked!', '#ff1938');
         break;
     }
 
@@ -1271,7 +1466,7 @@ export class BossManager {
       player.mana = player.maxMana;
       player.potionCooldown = 0;
 
-      if (this.bossRushWave < 14) {
+      if (this.bossRushWave < BOSS_CATALOG.length) {
         this.bossRushWave++;
         this.bossRushCountdown = 3.5;
         const upg = player.upgradeForBossRushWave(this.bossRushWave);
@@ -1280,7 +1475,7 @@ export class BossManager {
         }
         const nextEntry = BOSS_CATALOG[this.bossRushWave - 1];
         onChat(
-          `Full HP/Mana Restored! Next Up in 3.5s -> Wave ${this.bossRushWave}/14: ${nextEntry?.name}!`,
+          `Full HP/Mana Restored! Next Up in 3.5s -> Wave ${this.bossRushWave}/${BOSS_CATALOG.length}: ${nextEntry?.name}!`,
           '#ffd747'
         );
       } else {
@@ -1289,7 +1484,7 @@ export class BossManager {
         const mins = Math.floor(this.bossRushTimer / 60);
         const secs = (this.bossRushTimer % 60).toFixed(1);
         onChat(
-          `CHAMPION! All 14 Bosses Conquered! Final Boss Rush Time: ${mins}m ${secs}s!`,
+          `CALAMITY GODSLAYER! All ${BOSS_CATALOG.length} Bosses Conquered! Final Boss Rush Time: ${mins}m ${secs}s!`,
           '#05c8ff'
         );
       }
@@ -2615,6 +2810,362 @@ export class BossManager {
   }
 
   // =========================================================
+  // CALAMITY MOD BOSS AI BEHAVIORS (Tiers 15..18)
+  // =========================================================
+
+  private updateProvidence(
+    b: BossInstance,
+    dt: number,
+    player: Player,
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem
+  ): void {
+    const p = b.parts[0];
+    if (!p) return;
+
+    if (b.phase === 1 && p.hp < p.maxHp * 0.5) {
+      b.phase = 2;
+      audio.play('roar');
+      particles.spawnShockwave(p.x, p.y, '#ffd747', 260, 0.55, 7);
+    }
+
+    // Hover above player in a sweeping figure-8 profaned flight pattern
+    const tx = player.x + Math.sin(b.timer * 1.6) * 240;
+    const ty = player.y - 165 + Math.cos(b.timer * 3.2) * 55;
+    p.vx += (tx - p.x) * 4.5 * dt;
+    p.vy += (ty - p.y) * 4.5 * dt;
+    p.vx *= 0.91;
+    p.vy *= 0.91;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+
+    // Attack 1: Profaned Spear Fan every 1.2s
+    const spearCycle = b.phase === 2 ? 0.95 : 1.25;
+    if (Math.floor((b.timer - dt) / spearCycle) !== Math.floor(b.timer / spearCycle)) {
+      const baseA = Math.atan2(player.y - p.y, player.x - p.x);
+      for (const off of [-0.32, -0.16, 0, 0.16, 0.32]) {
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(baseA + off) * 540,
+          vy: Math.sin(baseA + off) * 540,
+          type: 'profaned_spear',
+          damage: 70,
+          friendly: false
+        });
+      }
+      audio.play('magic');
+    }
+
+    // Attack 2: Cocoon 14-Star Radial Eruption every 3.6s
+    if (Math.floor((b.subTimer - dt) / 3.6) !== Math.floor(b.subTimer / 3.6)) {
+      particles.spawnShockwave(p.x, p.y, '#2bff6e', 200, 0.4, 5);
+      for (let k = 0; k < 14; k++) {
+        const ang = (k / 14) * Math.PI * 2 + b.timer;
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(ang) * 420,
+          vy: Math.sin(ang) * 420,
+          type: k % 2 === 0 ? 'profaned_spear' : 'golem_fireball',
+          damage: 68,
+          friendly: false
+        });
+      }
+    }
+
+    // Attack 3: Sweeping Holy Ray of Day/Night every 5.8s
+    if (Math.floor((b.subTimer - dt) / 5.8) !== Math.floor(b.subTimer / 5.8)) {
+      const baseA = Math.atan2(player.y - p.y, player.x - p.x);
+      b.deathray = {
+        active: true,
+        originX: p.x,
+        originY: p.y,
+        angle: baseA - 0.7,
+        angularVel: 0.9,
+        timer: 1.7,
+        color: '#ffd747'
+      };
+      audio.play('laser');
+    }
+    if (b.deathray.active) {
+      b.deathray.originX = p.x;
+      b.deathray.originY = p.y;
+    }
+  }
+
+  private updateDevourerOfGods(
+    b: BossInstance,
+    dt: number,
+    player: Player,
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem,
+    onChat: (msg: string, color?: string) => void
+  ): void {
+    const head = b.parts[0];
+    if (!head) return;
+
+    if (b.phase === 1 && head.hp < head.maxHp * 0.55) {
+      b.phase = 2;
+      audio.play('roar');
+      particles.spawnShockwave(head.x, head.y, '#ff29c6', 300, 0.6, 8);
+      onChat("The Devourer of Gods: \"IT'S NOT OVER YET, KID!\"", '#ff29c6');
+    }
+
+    // High-speed Cosmic Worm Predatory Chase
+    const a = Math.atan2(player.y - head.y, player.x - head.x);
+    const targetSpeed = b.phase === 2 ? 560 : 470;
+    head.vx += Math.cos(a) * 1150 * dt;
+    head.vy += Math.sin(a) * 1150 * dt;
+    const spd = Math.hypot(head.vx, head.vy);
+    if (spd > targetSpeed) {
+      head.vx = (head.vx / spd) * targetSpeed;
+      head.vy = (head.vy / spd) * targetSpeed;
+    }
+    head.x += head.vx * dt;
+    head.y += head.vy * dt;
+
+    // Follow-the-leader chain kinematics for all 26 segments
+    for (let i = 1; i < b.parts.length; i++) {
+      const seg = b.parts[i];
+      const prev = b.parts[i - 1];
+      const dx = prev.x - seg.x;
+      const dy = prev.y - seg.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const spacing = 24;
+      if (d > spacing) {
+        seg.x = prev.x - (dx / d) * spacing;
+        seg.y = prev.y - (dy / d) * spacing;
+      }
+      seg.vx = dx * 10;
+      seg.vy = dy * 10;
+    }
+
+    // Attack 1: Body Segment Cosmic Laser Barrage every 1.4s
+    if (Math.floor((b.timer - dt) / 1.4) !== Math.floor(b.timer / 1.4)) {
+      const idx = 2 + Math.floor(Math.random() * (b.parts.length - 4));
+      const seg = b.parts[idx];
+      if (seg) {
+        const la = Math.atan2(player.y - seg.y, player.x - seg.x);
+        for (const off of [-0.15, 0, 0.15]) {
+          projectiles.spawn({
+            x: seg.x,
+            y: seg.y,
+            vx: Math.cos(la + off) * 520,
+            vy: Math.sin(la + off) * 520,
+            type: 'cosmic_blade',
+            damage: 74,
+            friendly: false
+          });
+        }
+        audio.play('laser');
+      }
+    }
+
+    // Attack 2: Dimensional Laser Wall Grid every 4.2s!
+    if (Math.floor((b.subTimer - dt) / 4.2) !== Math.floor(b.subTimer / 4.2)) {
+      particles.spawnShockwave(player.x, player.y, '#3be8d1', 220, 0.4, 5);
+      for (let k = -2; k <= 2; k++) {
+        // Horizontal laser line
+        projectiles.spawn({
+          x: player.x - 480,
+          y: player.y + k * 115,
+          vx: 560,
+          vy: 0,
+          type: 'phantasmal_bolt',
+          damage: 72,
+          friendly: false
+        });
+        // Vertical laser line
+        projectiles.spawn({
+          x: player.x + k * 130,
+          y: player.y - 440,
+          vx: 0,
+          vy: 560,
+          type: 'death_laser',
+          damage: 72,
+          friendly: false
+        });
+      }
+      audio.play('laser');
+    }
+
+    // Attack 3 (Phase 2): Cosmic Rift Warp Dash + God Slayer Fireball Burst every 5.0s!
+    if (b.phase === 2 && Math.floor((b.subTimer - dt) / 5.0) !== Math.floor(b.subTimer / 5.0)) {
+      const side = Math.random() < 0.5 ? -1 : 1;
+      head.x = player.x + side * 320;
+      head.y = player.y - 80;
+      const chargeA = Math.atan2(player.y - head.y, player.x - head.x);
+      head.vx = Math.cos(chargeA) * 760;
+      head.vy = Math.sin(chargeA) * 760;
+      particles.spawnShockwave(head.x, head.y, '#ff29c6', 240, 0.45, 6);
+      audio.play('roar');
+    }
+  }
+
+  private updateYharon(
+    b: BossInstance,
+    dt: number,
+    player: Player,
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem,
+    onChat: (msg: string, color?: string) => void
+  ): void {
+    const p = b.parts[0];
+    if (!p) return;
+
+    // Phase 2 Rebirth at 45% HP!
+    if (b.phase === 1 && p.hp < p.maxHp * 0.45) {
+      b.phase = 2;
+      p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.2)); // Rebirth heal!
+      audio.play('roar');
+      particles.triggerShake(16, 0.5);
+      particles.spawnShockwave(p.x, p.y, '#ffaa00', 320, 0.65, 9);
+      onChat('The enemy ascended beyond your control! YHARON REBORN!', '#ffaa00');
+    }
+
+    // Attack 1: High-Speed Phoenix Dragon Charges + Tracking Hover
+    if (b.subTimer > (b.phase === 2 ? 1.05 : 1.35)) {
+      b.subTimer = 0;
+      b.chargeCount++;
+      const a = Math.atan2(player.y - p.y, player.x - p.x);
+
+      if (b.chargeCount % 3 !== 0) {
+        // Blazing Phoenix Charge!
+        const spd = b.phase === 2 ? 780 : 650;
+        p.vx = Math.cos(a) * spd;
+        p.vy = Math.sin(a) * spd;
+        audio.play('roar');
+        particles.spawn(p.x, p.y, '#ffaa00', 18, 180, 4.5, 0, true);
+      } else {
+        // Attack 2: Flarenado 14-Fireball Ring Eruption!
+        particles.spawnShockwave(p.x, p.y, '#ff551c', 220, 0.45, 6);
+        const ringCount = b.phase === 2 ? 16 : 12;
+        for (let k = 0; k < ringCount; k++) {
+          const ang = (k / ringCount) * Math.PI * 2 + b.timer;
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(ang) * 480,
+            vy: Math.sin(ang) * 480,
+            type: 'yharon_fireball',
+            damage: 80,
+            friendly: false
+          });
+        }
+        audio.play('explosion');
+      }
+    }
+
+    // Attack 3: Dragon Fireball Fan Volley every 1.8s
+    if (Math.floor((b.timer - dt) / 1.8) !== Math.floor(b.timer / 1.8)) {
+      const baseA = Math.atan2(player.y - p.y, player.x - p.x);
+      for (const off of [-0.28, -0.14, 0, 0.14, 0.28]) {
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(baseA + off) * 580,
+          vy: Math.sin(baseA + off) * 580,
+          type: 'yharon_fireball',
+          damage: 78,
+          friendly: false
+        });
+      }
+    }
+
+    p.vx *= 0.96;
+    p.vy *= 0.96;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+  }
+
+  private updateSupremeCalamitas(
+    b: BossInstance,
+    dt: number,
+    player: Player,
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem
+  ): void {
+    const p = b.parts[0];
+    if (!p) return;
+
+    if (b.phase === 1 && p.hp < p.maxHp * 0.5) {
+      b.phase = 2;
+      audio.play('roar');
+      particles.triggerShake(16, 0.5);
+      particles.spawnShockwave(p.x, p.y, '#ff1938', 300, 0.6, 8);
+    }
+
+    // Hover above/around player with swift crimson dashes
+    const tx = player.x + Math.cos(b.timer * 2.1) * 230;
+    const ty = player.y - 150 + Math.sin(b.timer * 3.4) * 70;
+    p.vx += (tx - p.x) * 5.5 * dt;
+    p.vy += (ty - p.y) * 5.5 * dt;
+    p.vx *= 0.90;
+    p.vy *= 0.90;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+
+    // Attack 1: Brimstone Hellblast Fan every 1.05s
+    const fanCycle = b.phase === 2 ? 0.85 : 1.1;
+    if (Math.floor((b.timer - dt) / fanCycle) !== Math.floor(b.timer / fanCycle)) {
+      const baseA = Math.atan2(player.y - p.y, player.x - p.x);
+      for (const off of [-0.3, -0.15, 0, 0.15, 0.3]) {
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(baseA + off) * 580,
+          vy: Math.sin(baseA + off) * 580,
+          type: 'brimstone_hellblast',
+          damage: 84,
+          friendly: false
+        });
+      }
+      audio.play('magic');
+    }
+
+    // Attack 2: Bullet-Hell Brimstone Curtain every 3.8s!
+    if (Math.floor((b.subTimer - dt) / 3.8) !== Math.floor(b.subTimer / 3.8)) {
+      particles.spawnShockwave(p.x, p.y, '#ff1938', 220, 0.4, 6);
+      for (let k = -3; k <= 3; k++) {
+        projectiles.spawn({
+          x: player.x + k * 110 + (Math.random() - 0.5) * 35,
+          y: player.y - 420,
+          vx: 0,
+          vy: 480,
+          type: 'brimstone_hellblast',
+          damage: 80,
+          friendly: false
+        });
+      }
+      audio.play('explosion');
+    }
+
+    // Attack 3: Sweeping Abyssal Brimstone Laser every 5.6s!
+    if (Math.floor((b.subTimer - dt) / 5.6) !== Math.floor(b.subTimer / 5.6)) {
+      const baseA = Math.atan2(player.y - p.y, player.x - p.x);
+      b.deathray = {
+        active: true,
+        originX: p.x,
+        originY: p.y,
+        angle: baseA - 0.75,
+        angularVel: 0.95,
+        timer: 1.75,
+        color: '#ff1938'
+      };
+      audio.play('laser');
+    }
+    if (b.deathray.active) {
+      b.deathray.originX = p.x;
+      b.deathray.originY = p.y;
+    }
+  }
+
+  // =========================================================
   // PROCEDURAL PIXEL-ART BOSS RENDERER (1000x COOLER EDITION)
   // =========================================================
   render(ctx: CanvasRenderingContext2D, camX: number, camY: number, player: Player): void {
@@ -3163,6 +3714,175 @@ export class BossManager {
           ctx.arc(sx, sy, r * 0.25, 0, Math.PI * 2);
           ctx.fill();
         }
+      } else if (b.type === 'providence') {
+        // Providence, the Profaned Goddess: Blazing Golden Wings + Profaned Crystal Core
+        const wingFlap = Math.sin(b.timer * 9) * 18;
+        ctx.save();
+        ctx.translate(sx, sy);
+
+        // Sweeping Golden Profaned Fire Wings
+        ctx.fillStyle = b.phase === 2 ? '#2bff6e' : '#ffaa00';
+        for (const dir of [-1, 1]) {
+          ctx.beginPath();
+          ctx.moveTo(dir * 16, -6);
+          ctx.lineTo(dir * (r + 58), -38 + wingFlap);
+          ctx.lineTo(dir * (r + 42), 12 + wingFlap * 0.5);
+          ctx.lineTo(dir * 18, 22);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Profaned Stone Carapace Diamond
+        ctx.fillStyle = '#6e472b';
+        ctx.beginPath();
+        ctx.moveTo(0, -r - 12);
+        ctx.lineTo(r + 6, 0);
+        ctx.lineTo(0, r + 14);
+        ctx.lineTo(-r - 6, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#ffd747';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Blazing Solar/Holy Core
+        ctx.fillStyle = '#ffee55';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.26, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else if (b.type === 'devourer_of_gods') {
+        // The Devourer of Gods: Cosmilite Armored Worm with Neon Magenta/Cyan Conduits
+        ctx.save();
+        ctx.translate(sx, sy);
+        const segAngle = Math.atan2(part.vy || 0, part.vx || 1);
+        ctx.rotate(segAngle);
+
+        // Cosmilite Armor Segment
+        ctx.fillStyle = '#1b1136';
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = b.phase === 2 ? '#ff29c6' : '#3be8d1';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Giant Cosmic Mandibles on Head
+        if (part.role === 'head') {
+          ctx.fillStyle = '#ff29c6';
+          ctx.beginPath();
+          ctx.moveTo(r * 0.5, -r * 0.7);
+          ctx.lineTo(r + 22, -r * 0.35);
+          ctx.lineTo(r * 0.4, -3);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(r * 0.5, r * 0.7);
+          ctx.lineTo(r + 22, r * 0.35);
+          ctx.lineTo(r * 0.4, 3);
+          ctx.fill();
+        }
+
+        // Glowing Cosmilite Core
+        ctx.fillStyle = '#ff29c6';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.46, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#3be8d1';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else if (b.type === 'yharon') {
+        // Yharon, Dragon of Rebirth: Colossal Crimson-and-Gold Feathered Jungle Dragon!
+        const flap = Math.sin(b.timer * 14) * 24;
+        const faceDir = player.x >= part.x ? 1 : -1;
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.scale(faceDir, 1);
+
+        // Magnificent Phoenix Feathered Wings
+        ctx.fillStyle = b.phase === 2 ? '#ffaa00' : '#d9381e';
+        ctx.beginPath();
+        ctx.moveTo(-10, -10);
+        ctx.lineTo(-56, -r - 36 + flap);
+        ctx.lineTo(14, -r - 18 + flap * 0.6);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#2bff6e'; // Jungle Dragon emerald wing tips
+        ctx.beginPath();
+        ctx.arc(-44, -r - 26 + flap, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Armored Dragon Torso & Tail Plume
+        ctx.fillStyle = '#9e1f19';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 1.25, r * 0.88, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+
+        // Golden Dragon Horns
+        ctx.fillStyle = '#ffd747';
+        ctx.beginPath();
+        ctx.moveTo(14, -r * 0.55);
+        ctx.lineTo(18, -28);
+        ctx.lineTo(4, -22);
+        ctx.fill();
+
+        // Blazing Emerald/Gold Dragon Eye
+        ctx.fillStyle = b.phase === 2 ? '#00ffd5' : '#2bff6e';
+        ctx.fillRect(16, -10, 11, 8);
+        ctx.restore();
+      } else if (b.type === 'supreme_calamitas') {
+        // Supreme Witch, Calamitas: Crimson Brimstone Forcefield + Orbiting Hearts + Horned Witch
+        ctx.save();
+        ctx.translate(sx, sy);
+
+        // Rotating Brimstone Magic Circle Shield
+        ctx.save();
+        ctx.rotate(b.timer * 2.8);
+        ctx.strokeStyle = '#ff1938';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, r + 14, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let k = 0; k < 4; k++) {
+          const ha = (k / 4) * Math.PI * 2;
+          ctx.fillStyle = '#ffaa00';
+          ctx.beginPath();
+          ctx.arc(Math.cos(ha) * (r + 14), Math.sin(ha) * (r + 14), 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Obsidian & Crimson Witch Robes
+        ctx.fillStyle = '#1a0d18';
+        ctx.fillRect(-16, -20, 32, 42);
+        ctx.strokeStyle = '#ff1938';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-16, -20, 32, 42);
+
+        // Calamitas Horns & Glowing Scarlet Eyes
+        ctx.fillStyle = '#d9c5d4';
+        ctx.beginPath();
+        ctx.moveTo(-10, -20);
+        ctx.lineTo(-18, -34);
+        ctx.lineTo(-4, -20);
+        ctx.moveTo(10, -20);
+        ctx.lineTo(18, -34);
+        ctx.lineTo(4, -20);
+        ctx.fill();
+
+        ctx.fillStyle = '#ff1938';
+        ctx.fillRect(-8, -12, 6, 5);
+        ctx.fillRect(3, -12, 6, 5);
+        ctx.restore();
       } else {
         ctx.fillStyle = '#d9384a';
         ctx.beginPath();

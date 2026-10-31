@@ -101,7 +101,12 @@ export const RARITY_COLORS: Record<number, string> = {
   7: '#96ff0a',
   8: '#ffff0a',
   9: '#05c8ff',
-  10: '#ff2864'
+  10: '#ff2864',
+  11: '#00ffd5', // Calamity Turquoise
+  12: '#2bff6e', // Calamity Pure Green (Tarragon/Providence)
+  13: '#ff29c6', // Calamity Cosmilite Magenta (Devourer of Gods)
+  14: '#ffaa00', // Calamity Auric Gold (Yharon)
+  15: '#ff1938'  // Calamity Brimstone Scarlet (Supreme Calamitas)
 };
 
 export const ITEMS: Record<string, ItemDef> = {};
@@ -284,6 +289,79 @@ reg({
   axePower: 125,
   value: 80000,
   tooltip: '210% pickaxe power — Can mine Lihzahrd Bricks & Luminite'
+});
+reg({
+  id: 'reefshark_pickaxe',
+  name: 'Skyfringe Pickaxe [Calamity]',
+  category: 'tool',
+  iconType: 'pickaxe',
+  maxStack: 1,
+  rarity: 3,
+  color: '#3be8d1',
+  accentColor: '#ffd747',
+  damage: 16,
+  knockback: 3.5,
+  useTime: 0.14,
+  autoReuse: true,
+  pickPower: 65,
+  value: 4500,
+  tooltip: '[Calamity Mod] 65% pickaxe power — Aerial-forged pickaxe that mines Demonite & Hellstone'
+});
+reg({
+  id: 'blossom_pickaxe',
+  name: 'Blossom Pickaxe [Calamity]',
+  category: 'tool',
+  iconType: 'pickaxe',
+  maxStack: 1,
+  rarity: 12,
+  color: '#2bff6e',
+  accentColor: '#ff85d0',
+  damage: 75,
+  knockback: 6,
+  useTime: 0.055,
+  autoReuse: true,
+  pickPower: 250,
+  axePower: 150,
+  value: 350000,
+  tooltip: '[Calamity Mod] 250% pickaxe power — Blessed by Providence, mines blocks at blinding speed'
+});
+reg({
+  id: 'genesis_pickaxe',
+  name: 'Genesis Pickaxe [Calamity]',
+  category: 'tool',
+  iconType: 'pickaxe',
+  maxStack: 1,
+  rarity: 13,
+  color: '#ff29c6',
+  accentColor: '#3be8d1',
+  damage: 98,
+  knockback: 6.5,
+  useTime: 0.048,
+  autoReuse: true,
+  pickPower: 275,
+  axePower: 175,
+  value: 600000,
+  tooltip: '[Calamity Mod] 275% pickaxe power, 175% axe power — Forged from Cosmilite Bars'
+});
+reg({
+  id: 'crystyl_crusher',
+  name: 'Crystyl Crusher [Calamity]',
+  category: 'tool',
+  iconType: 'pickaxe',
+  maxStack: 1,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#ffaa00',
+  damage: 165,
+  knockback: 8,
+  useTime: 0.035,
+  autoReuse: true,
+  pickPower: 500,
+  axePower: 250,
+  hammerPower: 200,
+  range: 95,
+  value: 2500000,
+  tooltip: '[Calamity Mod] 500% Pickaxe / 250% Axe / 200% Hammer Power — Ultimate Shadowspec multi-tool!'
 });
 
 reg({
@@ -649,6 +727,88 @@ reg({
   value: 2000000,
   tooltip: 'The culmination of a journey — Unleashes a storm of legendary returning blades to your cursor!'
 });
+reg({
+  id: 'biome_blade',
+  name: 'Biome Blade [Calamity]',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 4,
+  color: '#3be8d1',
+  accentColor: '#59e62e',
+  damage: 62,
+  knockback: 6,
+  useTime: 0.20,
+  autoReuse: true,
+  range: 52,
+  projectileType: 'terra_beam',
+  projectileSpeed: 680,
+  value: 45000,
+  tooltip: '[Calamity Mod] Attuned to the world itself — Fires piercing biome energy waves'
+});
+reg({
+  id: 'excelsus',
+  name: 'Excelsus [Calamity]',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 13,
+  color: '#ff29c6',
+  accentColor: '#3be8d1',
+  damage: 145,
+  knockback: 8,
+  useTime: 0.14,
+  autoReuse: true,
+  range: 68,
+  projectileType: 'cosmic_blade',
+  projectileSpeed: 960,
+  projectileCount: 3,
+  spread: 0.16,
+  value: 1500000,
+  tooltip: '[Calamity Mod] Dropped by The Devourer of Gods — Fires triple dimensional laser blades'
+});
+reg({
+  id: 'dragon_rage',
+  name: "Dragon's Rage [Calamity]",
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 14,
+  color: '#ffaa00',
+  accentColor: '#ff2942',
+  damage: 185,
+  knockback: 9,
+  useTime: 0.13,
+  autoReuse: true,
+  range: 78,
+  projectileType: 'yharon_fireball',
+  projectileSpeed: 880,
+  projectileCount: 2,
+  spread: 0.22,
+  value: 2200000,
+  tooltip: '[Calamity Mod] Dropped by Yharon, Dragon of Rebirth — Unleashes a vortex of phoenix dragonfire!'
+});
+reg({
+  id: 'ark_of_the_cosmos',
+  name: 'Ark of the Cosmos [Calamity]',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#00ffd5',
+  damage: 230,
+  knockback: 10,
+  useTime: 0.11,
+  autoReuse: true,
+  range: 84,
+  projectileType: 'cosmos_ark',
+  projectileSpeed: 1080,
+  projectileCount: 3,
+  spread: 0.18,
+  value: 5000000,
+  tooltip: '[Calamity Mod] The ultimate Auric/Shadowspec scissor-blade — Rends reality with homing cosmic constellations!'
+});
 
 // =========================================================
 // 3. RANGED WEAPONS & AMMO
@@ -837,6 +997,45 @@ reg({
   useAmmo: 'bullet',
   value: 1000000,
   tooltip: 'Space Dolphin Machine Gun — Dropped by the Moon Lord'
+});
+reg({
+  id: 'phoenix_flame_blaster',
+  name: 'Drataliornus [Calamity]',
+  category: 'ranged',
+  iconType: 'bow',
+  maxStack: 1,
+  rarity: 14,
+  color: '#ffaa00',
+  accentColor: '#ff2942',
+  damage: 68,
+  knockback: 4.5,
+  useTime: 0.14,
+  autoReuse: true,
+  projectileSpeed: 1080,
+  projectileCount: 5,
+  spread: 0.16,
+  useAmmo: 'arrow',
+  value: 2000000,
+  tooltip: '[Calamity Mod] Dropped by Yharon — Fires a 5-arrow phoenix dragonfire storm!'
+});
+reg({
+  id: 'soma_prime',
+  name: 'Soma Prime [Calamity]',
+  category: 'ranged',
+  iconType: 'gun',
+  maxStack: 1,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#ffaa00',
+  damage: 88,
+  knockback: 3,
+  useTime: 0.05,
+  autoReuse: true,
+  projectileSpeed: 1280,
+  spread: 0.025,
+  useAmmo: 'bullet',
+  value: 3500000,
+  tooltip: '[Calamity Mod] Shadowspec hyper-minigun that shreds anything in existence'
 });
 
 reg({
@@ -1072,6 +1271,27 @@ reg({
   value: 1000000,
   tooltip: 'Fires a life-form disintegration rainbow — Dropped by the Moon Lord'
 });
+reg({
+  id: 'vehemence',
+  name: 'Vehemence [Calamity]',
+  category: 'magic',
+  iconType: 'staff',
+  maxStack: 1,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#ffaa00',
+  damage: 135,
+  knockback: 5,
+  useTime: 0.12,
+  autoReuse: true,
+  manaCost: 9,
+  projectileType: 'brimstone_hellblast',
+  projectileSpeed: 960,
+  projectileCount: 3,
+  spread: 0.18,
+  value: 3500000,
+  tooltip: '[Calamity Mod] Dropped by Supreme Witch, Calamitas — Unleashes homing Brimstone Hellblasts!'
+});
 
 // =========================================================
 // 5. ARMOR SETS (Head, Chest, Legs)
@@ -1147,6 +1367,12 @@ regArmorSet('titanium', 'Titanium', 5, '#c48fd9', '#f3d9ff', 15, 19, 15, 0.18, 3
 regArmorSet('hallowed', 'Hallowed', 5, '#ffd747', '#ff477e', 17, 21, 16, 0.21, 50000);
 regArmorSet('chlorophyte', 'Chlorophyte', 7, '#59e62e', '#baff80', 20, 24, 18, 0.25, 80000);
 regArmorSet('solar', 'Solar Flare', 10, '#ff771c', '#ffee55', 26, 34, 24, 0.32, 200000);
+// Calamity Mod Armor Sets!
+regArmorSet('aerospec', 'Aerospec [Calamity]', 3, '#3be8d1', '#ffd747', 6, 8, 6, 0.10, 6500);
+regArmorSet('tarragon', 'Tarragon [Calamity]', 12, '#2bff6e', '#ffd747', 32, 42, 28, 0.38, 400000);
+regArmorSet('god_slayer', 'God Slayer [Calamity]', 13, '#ff29c6', '#3be8d1', 38, 50, 34, 0.45, 750000);
+regArmorSet('auric_tesla', 'Auric Tesla [Calamity]', 14, '#ffaa00', '#00ffd5', 48, 62, 44, 0.54, 1500000);
+regArmorSet('demonshade', 'Demonshade [Calamity]', 15, '#ff1938', '#ffaa00', 58, 76, 52, 0.65, 3000000);
 
 // =========================================================
 // 6. ACCESSORIES & GRAPPLING HOOK
@@ -1302,6 +1528,24 @@ reg({
   value: 250000,
   tooltip: 'Summons a ridable UFO Mount with infinite 360° flight! (Press R to toggle mount, F to cycle mount style)'
 });
+reg({
+  id: 'celestial_tracers',
+  name: 'Celestial Tracers [Calamity]',
+  category: 'accessory',
+  iconType: 'accessory',
+  maxStack: 1,
+  rarity: 14,
+  color: '#ffaa00',
+  accentColor: '#00ffd5',
+  defense: 12,
+  bonusFlight: 5.5,
+  bonusSpeed: 0.55,
+  bonusDamage: 0.15,
+  noKnockback: true,
+  lavaImmune: true,
+  value: 1500000,
+  tooltip: '[Calamity Mod] Seraph Tracers — Extreme flight time, +55% speed, +15% damage, +12 defense & lava immunity!'
+});
 
 // =========================================================
 // 7. POTIONS & PERMANENT UPGRADES
@@ -1361,6 +1605,20 @@ reg({
   useTime: 0.3,
   value: 1500,
   tooltip: 'Restores 200 life'
+});
+reg({
+  id: 'omega_healing_potion',
+  name: 'Omega Healing Potion [Calamity]',
+  category: 'consumable',
+  iconType: 'potion',
+  maxStack: 999,
+  rarity: 13,
+  color: '#ff29c6',
+  accentColor: '#ffaa00',
+  healHp: 300,
+  useTime: 0.25,
+  value: 5000,
+  tooltip: '[Calamity Mod] Restores 300 life'
 });
 reg({
   id: 'mana_potion',
@@ -1663,6 +1921,62 @@ reg({
   value: 20000,
   tooltip: 'Summons the Moon Lord — Impending doom approaches...'
 });
+reg({
+  id: 'profaned_core',
+  name: 'Profaned Core [Calamity]',
+  category: 'summon',
+  iconType: 'summon',
+  maxStack: 20,
+  rarity: 12,
+  color: '#ffaa00',
+  accentColor: '#2bff6e',
+  summonBoss: 'providence',
+  useTime: 0.5,
+  value: 50000,
+  tooltip: '[Calamity Mod] Summons Providence, the Profaned Goddess'
+});
+reg({
+  id: 'cosmic_worm',
+  name: 'Cosmic Worm [Calamity]',
+  category: 'summon',
+  iconType: 'summon',
+  maxStack: 20,
+  rarity: 13,
+  color: '#ff29c6',
+  accentColor: '#3be8d1',
+  summonBoss: 'devourer_of_gods',
+  useTime: 0.5,
+  value: 75000,
+  tooltip: '[Calamity Mod] Summons The Devourer of Gods — "A GOD DOES NOT FEAR DEATH!"'
+});
+reg({
+  id: 'blessed_phoenix_egg',
+  name: 'Blessed Phoenix Egg [Calamity]',
+  category: 'summon',
+  iconType: 'summon',
+  maxStack: 20,
+  rarity: 14,
+  color: '#ffaa00',
+  accentColor: '#ff2942',
+  summonBoss: 'yharon',
+  useTime: 0.5,
+  value: 100000,
+  tooltip: '[Calamity Mod] Summons Yharon, Dragon of Rebirth — "The air is getting warmer around you..."'
+});
+reg({
+  id: 'altar_of_accursed',
+  name: 'Ashes of Calamity [Calamity]',
+  category: 'summon',
+  iconType: 'summon',
+  maxStack: 20,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#ffaa00',
+  summonBoss: 'supreme_calamitas',
+  useTime: 0.5,
+  value: 150000,
+  tooltip: '[Calamity Mod] Summons Supreme Witch, Calamitas — "Do you enjoy going through hell?"'
+});
 
 // =========================================================
 // 9. ORES, BARS & CRAFTING MATERIALS
@@ -1913,6 +2227,66 @@ reg({
   accentColor: '#ffee55',
   value: 2000,
   tooltip: "'The fury of the universe lies within this fragment'"
+});
+reg({
+  id: 'unholy_essence',
+  name: 'Unholy Essence [Calamity]',
+  category: 'material',
+  iconType: 'misc',
+  maxStack: 9999,
+  rarity: 12,
+  color: '#ffaa00',
+  accentColor: '#ffee55',
+  value: 4500,
+  tooltip: '[Calamity Mod] Profaned essence dropped by Providence'
+});
+reg({
+  id: 'cosmilite_bar',
+  name: 'Cosmilite Bar [Calamity]',
+  category: 'material',
+  iconType: 'bar',
+  maxStack: 9999,
+  rarity: 13,
+  color: '#ff29c6',
+  accentColor: '#3be8d1',
+  value: 12000,
+  tooltip: '[Calamity Mod] Otherworldly armor plating dropped by The Devourer of Gods'
+});
+reg({
+  id: 'yharon_soul_fragment',
+  name: 'Yharon Soul Fragment [Calamity]',
+  category: 'material',
+  iconType: 'misc',
+  maxStack: 9999,
+  rarity: 14,
+  color: '#ffaa00',
+  accentColor: '#ff2942',
+  value: 18000,
+  tooltip: '[Calamity Mod] A burning shard of the Jungle Dragon’s rebirth soul'
+});
+reg({
+  id: 'auric_bar',
+  name: 'Auric Bar [Calamity]',
+  category: 'material',
+  iconType: 'bar',
+  maxStack: 9999,
+  rarity: 14,
+  color: '#ffaa00',
+  accentColor: '#00ffd5',
+  value: 25000,
+  tooltip: '[Calamity Mod] Draconic gold bar surging with Yharon’s auric voltage'
+});
+reg({
+  id: 'shadowspec_bar',
+  name: 'Shadowspec Bar [Calamity]',
+  category: 'material',
+  iconType: 'bar',
+  maxStack: 9999,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#ffaa00',
+  value: 40000,
+  tooltip: '[Calamity Mod] The pinnacle of Calamity metallurgy — Forged from Supreme Calamitas’s brimstone'
 });
 
 // =========================================================

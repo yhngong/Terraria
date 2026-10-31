@@ -314,6 +314,50 @@ export class ProjectileManager {
         p.color = '#2be6b8';
         p.accentColor = '#d4fff5';
         break;
+      // Calamity Mod Projectiles
+      case 'cosmic_blade':
+        p.pierce = 8;
+        p.tileCollide = false;
+        p.radius = 15;
+        p.life = 1.6;
+        p.color = '#ff29c6';
+        p.accentColor = '#3be8d1';
+        break;
+      case 'yharon_fireball':
+        p.pierce = 6;
+        p.homing = p.friendly;
+        p.tileCollide = false;
+        p.radius = 14;
+        p.life = 2.4;
+        p.color = '#ffaa00';
+        p.accentColor = '#ff2942';
+        break;
+      case 'cosmos_ark':
+        p.pierce = 14;
+        p.homing = true;
+        p.tileCollide = false;
+        p.radius = 18;
+        p.life = 1.8;
+        p.color = '#ff1938';
+        p.accentColor = '#00ffd5';
+        break;
+      case 'brimstone_hellblast':
+        p.pierce = 6;
+        p.homing = p.friendly;
+        p.tileCollide = false;
+        p.radius = 12;
+        p.life = 2.8;
+        p.color = '#ff1938';
+        p.accentColor = '#ffaa00';
+        break;
+      case 'profaned_spear':
+        p.pierce = 5;
+        p.tileCollide = false;
+        p.radius = 10;
+        p.life = 2.8;
+        p.color = '#ffd747';
+        p.accentColor = '#2bff6e';
+        break;
     }
 
     this.projectiles.push(p);
@@ -495,7 +539,8 @@ export class ProjectileManager {
         p.type === 'death_laser' ||
         p.type === 'golem_beam' ||
         p.type === 'phantasmal_bolt' ||
-        p.type === 'prism_beam'
+        p.type === 'prism_beam' ||
+        p.type === 'profaned_spear'
       ) {
         ctx.fillStyle = p.color;
         ctx.fillRect(-14, -3.5, 28, 7);
@@ -506,7 +551,9 @@ export class ProjectileManager {
         p.type === 'typhoon' ||
         p.type === 'night_arc' ||
         p.type === 'terra_beam' ||
-        p.type === 'holy_beam'
+        p.type === 'holy_beam' ||
+        p.type === 'cosmic_blade' ||
+        p.type === 'cosmos_ark'
       ) {
         ctx.rotate(p.life * 20);
         ctx.strokeStyle = p.color;

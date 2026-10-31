@@ -83,7 +83,7 @@ export class HUD {
       if (this.inventoryOpen && input.mouseX < 360 && input.mouseY > 280) {
         this.craftScroll = Math.max(0, this.craftScroll + input.wheelDelta);
       } else if (this.bossMenuOpen) {
-        this.bossScroll = clamp(this.bossScroll + input.wheelDelta, 0, 8);
+        this.bossScroll = clamp(this.bossScroll + input.wheelDelta, 0, Math.max(0, BOSS_CATALOG.length - 7));
       } else {
         player.selectedSlot = (player.selectedSlot + input.wheelDelta + 10) % 10;
       }
@@ -452,6 +452,30 @@ export class HUD {
               }
             },
             {
+              label: 'Calamity Gear',
+              action: () => {
+                player.addItem('ark_of_the_cosmos', 1);
+                player.addItem('dragon_rage', 1);
+                player.addItem('excelsus', 1);
+                player.addItem('phoenix_flame_blaster', 1);
+                player.addItem('soma_prime', 1);
+                player.addItem('vehemence', 1);
+                player.addItem('crystyl_crusher', 1);
+                player.addItem('omega_healing_potion', 30);
+                player.armor.head = { id: 'demonshade_helmet', count: 1 };
+                player.armor.chest = { id: 'demonshade_breastplate', count: 1 };
+                player.armor.legs = { id: 'demonshade_leggings', count: 1 };
+                player.accessories[0] = { id: 'celestial_tracers', count: 1 };
+                player.accessories[1] = { id: 'ankh_shield', count: 1 };
+                player.accessories[2] = { id: 'celestial_shell', count: 1 };
+                player.maxHp = 700;
+                player.hp = 700;
+                player.maxMana = 200;
+                player.mana = 200;
+                this.addChat("Equipped Supreme Calamity Loadout (Ark of the Cosmos, Dragon's Rage, Crystyl Crusher & Demonshade Armor)!", '#ff1938');
+              }
+            },
+            {
               label: 'TP: Spawn',
               action: () => {
                 player.x = world.spawnX;
@@ -490,7 +514,7 @@ export class HUD {
           ];
 
           topBtns.forEach((b, idx) => {
-            const br = { x: panel.x + 14 + idx * 79, y: panel.y + 44, w: 75, h: 24 };
+            const br = { x: panel.x + 12 + idx * 71, y: panel.y + 44, w: 68, h: 24 };
             if (pointInRect(mx, my, br)) {
               b.action();
               audio.play('craft');
@@ -806,7 +830,7 @@ export class HUD {
     ctx.strokeRect(sw - 220, 158, 102, 24);
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 11px monospace';
-    ctx.fillText('[K] 14 Bosses', sw - 213, 174);
+    ctx.fillText(`[K] ${BOSS_CATALOG.length} Bosses`, sw - 213, 174);
 
     ctx.fillStyle = '#244f3d';
     ctx.fillRect(sw - 112, 158, 96, 24);
@@ -830,7 +854,7 @@ export class HUD {
       const secs = (bosses.bossRushTimer % 60).toFixed(1).padStart(4, '0');
       if (bosses.bossRushCompleted) {
         ctx.fillStyle = '#05c8ff';
-        ctx.fillText(`🏆 14-BOSS RUSH COMPLETED! CLEAR TIME: ${mins}:${secs}`, cx, 31);
+        ctx.fillText(`🏆 ${BOSS_CATALOG.length}-BOSS RUSH COMPLETED! CLEAR TIME: ${mins}:${secs}`, cx, 31);
       } else if (bosses.bossRushActive) {
         const waveEntry = BOSS_CATALOG[bosses.bossRushWave - 1];
         const waveStatus =
@@ -839,7 +863,7 @@ export class HUD {
             : waveEntry?.name || '';
         ctx.fillStyle = '#ffd747';
         ctx.fillText(
-          `⚔ BOSS RUSH WAVE ${bosses.bossRushWave}/14: ${waveStatus} (${mins}:${secs})`,
+          `⚔ BOSS RUSH WAVE ${bosses.bossRushWave}/${BOSS_CATALOG.length}: ${waveStatus} (${mins}:${secs})`,
           cx,
           31
         );
@@ -1177,7 +1201,7 @@ export class HUD {
     ctx.font = 'bold 15px monospace';
     ctx.fillStyle = '#ffd747';
     ctx.fillText(
-      `BOSS ENCYCLOPEDIA & PROGRESSION TRACKER (${world.defeatedBosses.size}/14 Defeated) — Scroll Wheel`,
+      `BOSS ENCYCLOPEDIA & PROGRESSION TRACKER (${world.defeatedBosses.size}/${BOSS_CATALOG.length} Defeated) — Scroll Wheel`,
       px + 16,
       py + 26
     );
@@ -1186,22 +1210,23 @@ export class HUD {
 
     // Top Quick Loadout & Teleport Bar
     const topLabels = [
-      'Pre-HM Gear',
-      'Hardmode Gear',
-      'Endgame Gear',
+      'Pre-HM',
+      'Hardmode',
+      'Endgame',
       `God: ${player.godMode ? 'ON' : 'OFF'}`,
+      'Calamity',
       'TP: Spawn',
-      'TP: Dungeon',
-      'TP: Temple',
+      'TP: Dungn',
+      'TP: Templ',
       'TP: Hell'
     ];
     topLabels.forEach((lbl, idx) => {
-      const bx = px + 14 + idx * 79;
+      const bx = px + 12 + idx * 71;
       const by = py + 44;
-      ctx.fillStyle = '#273859';
-      ctx.fillRect(bx, by, 75, 24);
-      ctx.strokeStyle = '#6bb5ff';
-      ctx.strokeRect(bx, by, 75, 24);
+      ctx.fillStyle = idx === 4 ? '#4a1228' : '#273859';
+      ctx.fillRect(bx, by, 68, 24);
+      ctx.strokeStyle = idx === 4 ? '#ff1938' : '#6bb5ff';
+      ctx.strokeRect(bx, by, 68, 24);
       ctx.fillStyle = '#fff';
       ctx.font = '10px monospace';
       ctx.fillText(lbl, bx + 4, by + 16);

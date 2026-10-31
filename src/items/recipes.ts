@@ -201,5 +201,52 @@ export const RECIPES: Recipe[] = [
   { result: 'solar_helmet', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 8 }, { id: 'solar_fragment', count: 10 }] },
   { result: 'solar_breastplate', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 16 }, { id: 'solar_fragment', count: 20 }] },
   { result: 'solar_leggings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 12 }, { id: 'solar_fragment', count: 15 }] },
-  { result: 'solar_wings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 10 }, { id: 'solar_fragment', count: 14 }] }
+  { result: 'solar_wings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 10 }, { id: 'solar_fragment', count: 14 }] },
+
+  // =========================================================
+  // CALAMITY MOD CRAFTING (Aerospec, Tarragon, God Slayer, Auric Tesla, Demonshade)
+  // =========================================================
+  { result: 'reefshark_pickaxe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'gold_bar', count: 10 }, { id: 'fallen_star', count: 3 }] },
+  { result: 'biome_blade', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'dirt_block', count: 15 }, { id: 'sand_block', count: 15 }, { id: 'ice_block', count: 15 }, { id: 'gold_bar', count: 8 }] },
+  { result: 'aerospec_helmet', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'gold_bar', count: 6 }, { id: 'cloud_block', count: 10 }, { id: 'fallen_star', count: 2 }] },
+  { result: 'aerospec_breastplate', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'gold_bar', count: 10 }, { id: 'cloud_block', count: 15 }, { id: 'fallen_star', count: 3 }] },
+  { result: 'aerospec_leggings', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'gold_bar', count: 8 }, { id: 'cloud_block', count: 12 }, { id: 'fallen_star', count: 2 }] },
+
+  // Calamity Boss Summons
+  { result: 'profaned_core', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 5 }, { id: 'solar_fragment', count: 10 }] },
+  { result: 'cosmic_worm', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'unholy_essence', count: 10 }, { id: 'luminite_bar', count: 5 }] },
+  { result: 'blessed_phoenix_egg', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'cosmilite_bar', count: 8 }, { id: 'unholy_essence', count: 8 }] },
+  { result: 'altar_of_accursed', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'auric_bar', count: 8 }, { id: 'yharon_soul_fragment', count: 5 }] },
+
+  // Post-Providence (Tarragon & Blossom)
+  { result: 'blossom_pickaxe', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'unholy_essence', count: 12 }, { id: 'chlorophyte_bar', count: 10 }] },
+  { result: 'tarragon_helmet', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'unholy_essence', count: 10 }, { id: 'luminite_bar', count: 6 }] },
+  { result: 'tarragon_breastplate', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'unholy_essence', count: 18 }, { id: 'luminite_bar', count: 12 }] },
+  { result: 'tarragon_leggings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'unholy_essence', count: 14 }, { id: 'luminite_bar', count: 8 }] },
+  { result: 'omega_healing_potion', count: 4, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'super_healing_potion', count: 4 }, { id: 'unholy_essence', count: 2 }] },
+
+  // Post-Devourer of Gods (God Slayer & Cosmilite)
+  { result: 'genesis_pickaxe', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'cosmilite_bar', count: 12 }, { id: 'blossom_pickaxe', count: 1 }] },
+  { result: 'excelsus', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'cosmilite_bar', count: 14 }] },
+  { result: 'god_slayer_helmet', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'cosmilite_bar', count: 10 }] },
+  { result: 'god_slayer_breastplate', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'cosmilite_bar', count: 18 }] },
+  { result: 'god_slayer_leggings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'cosmilite_bar', count: 14 }] },
+
+  // Post-Yharon (Auric Tesla & Dragon's Rage)
+  { result: 'auric_bar', count: 5, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'yharon_soul_fragment', count: 2 }, { id: 'cosmilite_bar', count: 5 }, { id: 'unholy_essence', count: 5 }] },
+  { result: 'dragon_rage', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'auric_bar', count: 12 }, { id: 'yharon_soul_fragment', count: 6 }] },
+  { result: 'phoenix_flame_blaster', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'auric_bar', count: 12 }, { id: 'yharon_soul_fragment', count: 6 }] },
+  { result: 'celestial_tracers', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'solar_wings', count: 1 }, { id: 'hermes_boots', count: 1 }, { id: 'auric_bar', count: 8 }] },
+  { result: 'auric_tesla_helmet', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'auric_bar', count: 12 }, { id: 'tarragon_helmet', count: 1 }, { id: 'god_slayer_helmet', count: 1 }] },
+  { result: 'auric_tesla_breastplate', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'auric_bar', count: 20 }, { id: 'tarragon_breastplate', count: 1 }, { id: 'god_slayer_breastplate', count: 1 }] },
+  { result: 'auric_tesla_leggings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'auric_bar', count: 16 }, { id: 'tarragon_leggings', count: 1 }, { id: 'god_slayer_leggings', count: 1 }] },
+
+  // Post-Supreme Calamitas (Shadowspec & Demonshade)
+  { result: 'crystyl_crusher', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 10 }, { id: 'genesis_pickaxe', count: 1 }] },
+  { result: 'ark_of_the_cosmos', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 12 }, { id: 'auric_bar', count: 10 }, { id: 'terra_blade', count: 1 }] },
+  { result: 'soma_prime', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 12 }, { id: 'sdmg', count: 1 }] },
+  { result: 'vehemence', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 12 }, { id: 'last_prism', count: 1 }] },
+  { result: 'demonshade_helmet', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 10 }, { id: 'auric_tesla_helmet', count: 1 }] },
+  { result: 'demonshade_breastplate', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 18 }, { id: 'auric_tesla_breastplate', count: 1 }] },
+  { result: 'demonshade_leggings', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'shadowspec_bar', count: 14 }, { id: 'auric_tesla_leggings', count: 1 }] }
 ];

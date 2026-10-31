@@ -212,6 +212,35 @@ export class Player {
       this.hp = 500;
       return 'Celestial Endgame Arsenal Unlocked: Meowmere, S.D.M.G., Last Prism, Solar Eruption & Solar Armor!';
     }
+    if (wave === 15) {
+      // Entering Calamity Post-Moon Lord (Providence & Devourer of Gods)
+      this.inventory[0] = { id: 'excelsus', count: 1 };
+      this.inventory[1] = { id: 'zenith', count: 1 };
+      this.inventory[2] = { id: 'last_prism', count: 1 };
+      this.inventory[3] = { id: 'blossom_pickaxe', count: 1 };
+      this.inventory[4] = { id: 'omega_healing_potion', count: 30 };
+      this.armor.head = { id: 'tarragon_helmet', count: 1 };
+      this.armor.chest = { id: 'tarragon_breastplate', count: 1 };
+      this.armor.legs = { id: 'tarragon_leggings', count: 1 };
+      this.maxHp = 600;
+      this.hp = 600;
+      return 'Calamity Tier I Unlocked: Excelsus, The Zenith, Blossom Pickaxe & Tarragon Armor!';
+    }
+    if (wave === 17) {
+      // Entering Yharon & Supreme Witch, Calamitas
+      this.inventory[0] = { id: 'dragon_rage', count: 1 };
+      this.inventory[1] = { id: 'phoenix_flame_blaster', count: 1 };
+      this.inventory[2] = { id: 'vehemence', count: 1 };
+      this.inventory[3] = { id: 'crystyl_crusher', count: 1 };
+      this.inventory[4] = { id: 'omega_healing_potion', count: 40 };
+      this.armor.head = { id: 'auric_tesla_helmet', count: 1 };
+      this.armor.chest = { id: 'auric_tesla_breastplate', count: 1 };
+      this.armor.legs = { id: 'auric_tesla_leggings', count: 1 };
+      this.accessories[1] = { id: 'celestial_tracers', count: 1 };
+      this.maxHp = 700;
+      this.hp = 700;
+      return "Calamity Auric Tier Unlocked: Dragon's Rage, Drataliornus, Vehemence, Crystyl Crusher & Auric Tesla Armor!";
+    }
     return null;
   }
 
