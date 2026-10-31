@@ -207,7 +207,7 @@ export class ProjectileManager {
       case 'terra_beam':
         p.pierce = 6;
         p.tileCollide = false;
-        p.radius = 16;
+        p.radius = 11;
         p.life = 1.8;
         p.color = '#34e864';
         p.accentColor = '#b0ffc4';
@@ -215,7 +215,7 @@ export class ProjectileManager {
       case 'solar_spear':
         p.pierce = 12;
         p.tileCollide = false;
-        p.radius = 17;
+        p.radius = 12;
         p.life = 0.9;
         p.color = '#ff771c';
         p.accentColor = '#ffee55';
@@ -318,7 +318,7 @@ export class ProjectileManager {
       case 'cosmic_blade':
         p.pierce = 8;
         p.tileCollide = false;
-        p.radius = 15;
+        p.radius = 11;
         p.life = 1.6;
         p.color = '#ff29c6';
         p.accentColor = '#3be8d1';
@@ -327,7 +327,7 @@ export class ProjectileManager {
         p.pierce = 6;
         p.homing = p.friendly;
         p.tileCollide = false;
-        p.radius = 14;
+        p.radius = 10;
         p.life = 2.4;
         p.color = '#ffaa00';
         p.accentColor = '#ff2942';
@@ -336,7 +336,7 @@ export class ProjectileManager {
         p.pierce = 14;
         p.homing = true;
         p.tileCollide = false;
-        p.radius = 18;
+        p.radius = 12;
         p.life = 1.8;
         p.color = '#ff1938';
         p.accentColor = '#00ffd5';
@@ -345,7 +345,7 @@ export class ProjectileManager {
         p.pierce = 6;
         p.homing = p.friendly;
         p.tileCollide = false;
-        p.radius = 12;
+        p.radius = 10;
         p.life = 2.8;
         p.color = '#ff1938';
         p.accentColor = '#ffaa00';
@@ -353,7 +353,7 @@ export class ProjectileManager {
       case 'profaned_spear':
         p.pierce = 5;
         p.tileCollide = false;
-        p.radius = 10;
+        p.radius = 9;
         p.life = 2.8;
         p.color = '#ffd747';
         p.accentColor = '#2bff6e';
@@ -361,7 +361,7 @@ export class ProjectileManager {
       case 'holy_collider_flame':
         p.pierce = 10;
         p.tileCollide = false;
-        p.radius = 16;
+        p.radius = 11;
         p.life = 1.1;
         p.color = '#ffd747';
         p.accentColor = '#ff771c';
@@ -369,7 +369,7 @@ export class ProjectileManager {
       case 'galactus_comet':
         p.pierce = 12;
         p.tileCollide = false;
-        p.radius = 15;
+        p.radius = 11;
         p.life = 1.5;
         p.color = '#ff47b8';
         p.accentColor = '#3be8d1';
@@ -378,7 +378,7 @@ export class ProjectileManager {
         p.pierce = 12;
         p.homing = true;
         p.tileCollide = false;
-        p.radius = 17;
+        p.radius = 12;
         p.life = 2.1;
         p.color = '#a638ff';
         p.accentColor = '#ff29c6';
@@ -391,7 +391,7 @@ export class ProjectileManager {
         ][Math.floor(Math.random() * 3)];
         p.pierce = 14;
         p.tileCollide = false;
-        p.radius = 17;
+        p.radius = 11;
         p.life = 1.6;
         p.color = earthPal[0];
         p.accentColor = earthPal[1];
@@ -405,7 +405,7 @@ export class ProjectileManager {
       case 'yoyo_azathoth': {
         p.pierce = 999;
         p.tileCollide = false;
-        p.radius = 15;
+        p.radius = 8;
         p.life = 1.35;
         p.maxLife = 1.35;
         if (p.type === 'yoyo_air') {
@@ -426,7 +426,7 @@ export class ProjectileManager {
         } else {
           p.color = '#ff1938';
           p.accentColor = '#ffaa00';
-          p.radius = 18;
+          p.radius = 9.5;
         }
         break;
       }
@@ -704,6 +704,22 @@ export class ProjectileManager {
         ctx.fillRect(-14, -3.5, 28, 7);
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(-10, -1.5, 20, 3);
+      } else if (p.type.startsWith('yoyo_')) {
+        // Crisp compact spinning Yoyo disc with axle hub
+        ctx.rotate(p.life * 26);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = p.accentColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius * 0.72, 0, Math.PI * 1.5);
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
+        ctx.fill();
       } else if (
         p.type === 'demon_scythe' ||
         p.type === 'typhoon' ||
@@ -713,8 +729,7 @@ export class ProjectileManager {
         p.type === 'cosmic_blade' ||
         p.type === 'cosmos_ark' ||
         p.type === 'death_scythe' ||
-        p.type === 'holy_collider_flame' ||
-        p.type.startsWith('yoyo_')
+        p.type === 'holy_collider_flame'
       ) {
         ctx.rotate(p.life * 20);
         ctx.strokeStyle = p.color;

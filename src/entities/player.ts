@@ -1562,10 +1562,15 @@ export class Player {
 
   getMeleeHitbox(): Rect | null {
     const held = this.getHeldItem();
-    if (!held || this.swingTimer <= 0 || (!held.damage && held.category !== 'melee')) {
+    if (
+      !held ||
+      this.swingTimer <= 0 ||
+      held.iconType === 'yoyo' ||
+      (!held.damage && held.category !== 'melee')
+    ) {
       return null;
     }
-    const reach = held.range || 38;
+    const reach = clamp(held.range || 38, 24, 68);
     return {
       x: this.facing > 0 ? this.x - 6 : this.x - reach,
       y: this.y - reach * 0.75,
@@ -1724,21 +1729,24 @@ export class Player {
       }
     }
 
-    // Swinging Held Weapon / Tool
+    // Swinging Held Weapon / Tool (Yoyos are thrown on a string rather than swung overhead)
     if (this.swingTimer > 0) {
       const held = this.getHeldItem();
-      if (held) {
+      if (held && held.iconType !== 'yoyo') {
         const prog = 1 - this.swingTimer / Math.max(0.05, this.swingDuration);
         const startA = this.facing > 0 ? -Math.PI * 0.65 : -Math.PI * 0.35;
         const endA = this.facing > 0 ? Math.PI * 0.35 : -Math.PI * 1.35;
         const angle = startA + (endA - startA) * prog;
         const icon = atlas.getItemIcon(held);
-        const scale = held.range ? held.range / 28 : 1.0;
+        const scale = held.range
+          ? clamp(0.8 + (held.range - 28) * 0.01, 0.75, 1.22)
+          : 0.9;
+        const drawSize = 18 * scale;
 
         ctx.save();
         ctx.translate(sx + this.facing * 4, sy - 1);
         ctx.rotate(angle);
-        ctx.drawImage(icon, 0, -22 * scale, 24 * scale, 24 * scale);
+        ctx.drawImage(icon, 0, -drawSize * 0.92, drawSize, drawSize);
         ctx.restore();
       }
     }
