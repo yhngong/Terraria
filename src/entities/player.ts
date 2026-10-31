@@ -205,7 +205,7 @@ export class Player {
         mult += ITEMS[acc.id].bonusDamage!;
       }
     }
-    return mult;
+    return mult * 0.5;
   }
 
   hasNoKnockback(): boolean {
