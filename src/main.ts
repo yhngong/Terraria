@@ -60,8 +60,8 @@ class TerrariaGame {
 
   private initNewWorld(seed: number, mode: 'arena' | 'survival' = 'arena'): void {
     this.world = mode === 'arena' ? generateArenaWorld() : generateWorld(seed);
-    this.player = new Player(this.world.spawnX, this.world.spawnY);
-    this.player.mounted = true;
+    this.player = new Player(this.world.spawnX, this.world.spawnY, mode);
+    this.player.mounted = mode === 'arena';
     this.projectiles = new ProjectileManager();
     this.enemies = new EnemyManager();
     this.enemies.allowNaturalSpawns = mode === 'survival';
@@ -71,10 +71,17 @@ class TerrariaGame {
     this.camX = this.player.x - this.canvas.width / (2 * this.zoom);
     this.camY = this.player.y - this.canvas.height / (2 * this.zoom);
 
-    this.hud.addChat(
-      'FLYING MOUNT ACTIVE! [WASD] 360° Flight, [Shift] Sonic Turbo Dash, [F] Switch Mount! Gear auto-upgrades as you beat Boss Rush waves!',
-      '#3be8d1'
-    );
+    if (mode === 'survival') {
+      this.hud.addChat(
+        'Classic Survival World generated! Starting with Bronze Gear (Sword, Bow, Pickaxe, Axe & Bronze Armor)!',
+        '#f2b068'
+      );
+    } else {
+      this.hud.addChat(
+        'FLYING MOUNT ACTIVE! [WASD] 360° Flight, [Shift] Sonic Turbo Dash, [F] Switch Mount! Gear auto-upgrades as you beat Boss Rush waves!',
+        '#3be8d1'
+      );
+    }
   }
 
   private saveGame(): void {

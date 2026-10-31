@@ -77,15 +77,41 @@ export class Player {
   mountDashCooldown = 0;
   mountHoverPhase = 0;
 
-  constructor(spawnX: number, spawnY: number) {
+  constructor(spawnX: number, spawnY: number, mode: 'arena' | 'survival' = 'arena') {
     this.x = spawnX;
     this.y = spawnY;
     this.fallStartY = spawnY;
-    this.giveStarterKit();
+    this.giveStarterKit(mode);
   }
 
-  giveStarterKit(): void {
+  giveStarterKit(mode: 'arena' | 'survival' = 'arena'): void {
     this.inventory.fill(null);
+    this.armor = { head: null, chest: null, legs: null };
+    this.accessories.fill(null);
+
+    if (mode === 'survival') {
+      this.mounted = false;
+      this.inventory[0] = { id: 'bronze_broadsword', count: 1 };
+      this.inventory[1] = { id: 'bronze_bow', count: 1 };
+      this.inventory[2] = { id: 'bronze_pickaxe', count: 1 };
+      this.inventory[3] = { id: 'bronze_axe', count: 1 };
+      this.inventory[4] = { id: 'torch', count: 35 };
+      this.inventory[5] = { id: 'lesser_healing_potion', count: 10 };
+      this.inventory[6] = { id: 'wooden_arrow', count: 150 };
+      this.inventory[7] = { id: 'wood_platform', count: 50 };
+
+      this.maxHp = 120;
+      this.hp = 120;
+      this.maxMana = 40;
+      this.mana = 40;
+
+      this.armor.head = { id: 'bronze_helmet', count: 1 };
+      this.armor.chest = { id: 'bronze_breastplate', count: 1 };
+      this.armor.legs = { id: 'bronze_leggings', count: 1 };
+      return;
+    }
+
+    this.mounted = true;
     this.inventory[0] = { id: 'blade_of_grass', count: 1 };
     this.inventory[1] = { id: 'bees_knees', count: 1 };
     this.inventory[2] = { id: 'water_bolt', count: 1 };
@@ -103,8 +129,8 @@ export class Player {
     this.mana = 180;
 
     this.armor.head = { id: 'shadow_helmet', count: 1 };
-    this.armor.chest = { id: 'shadow_scalemail', count: 1 };
-    this.armor.legs = { id: 'shadow_greaves', count: 1 };
+    this.armor.chest = { id: 'shadow_breastplate', count: 1 };
+    this.armor.legs = { id: 'shadow_leggings', count: 1 };
 
     this.accessories[0] = { id: 'cosmic_car_key', count: 1 };
     this.accessories[1] = { id: 'hermes_boots', count: 1 };

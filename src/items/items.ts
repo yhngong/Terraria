@@ -326,19 +326,87 @@ reg({
 // =========================================================
 reg({
   id: 'copper_shortsword',
-  name: 'Copper Shortsword',
+  name: 'Bronze Shortsword',
   category: 'melee',
   iconType: 'sword',
   maxStack: 1,
   rarity: 0,
-  color: '#d9783b',
-  accentColor: '#ffad70',
-  damage: 7,
+  color: '#cd7f32',
+  accentColor: '#f2b068',
+  damage: 18,
   knockback: 4,
-  useTime: 0.24,
+  useTime: 0.22,
   autoReuse: true,
-  range: 28,
+  range: 34,
   value: 70
+});
+reg({
+  id: 'bronze_broadsword',
+  name: 'Bronze Broadsword',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 0,
+  color: '#cd7f32',
+  accentColor: '#f2b068',
+  damage: 24,
+  knockback: 4.5,
+  useTime: 0.21,
+  autoReuse: true,
+  range: 38,
+  value: 180,
+  tooltip: 'Sturdy bronze blade for survival exploration'
+});
+reg({
+  id: 'bronze_pickaxe',
+  name: 'Bronze Pickaxe',
+  category: 'tool',
+  iconType: 'pickaxe',
+  maxStack: 1,
+  rarity: 0,
+  color: '#cd7f32',
+  accentColor: '#f2b068',
+  damage: 10,
+  knockback: 2,
+  useTime: 0.20,
+  autoReuse: true,
+  pickPower: 40,
+  value: 150,
+  tooltip: '40% pickaxe power'
+});
+reg({
+  id: 'bronze_axe',
+  name: 'Bronze Axe',
+  category: 'tool',
+  iconType: 'axe',
+  maxStack: 1,
+  rarity: 0,
+  color: '#cd7f32',
+  accentColor: '#f2b068',
+  damage: 11,
+  knockback: 3,
+  useTime: 0.22,
+  autoReuse: true,
+  axePower: 45,
+  value: 140,
+  tooltip: 'Chops down trees'
+});
+reg({
+  id: 'bronze_bow',
+  name: 'Bronze Bow',
+  category: 'ranged',
+  iconType: 'bow',
+  maxStack: 1,
+  rarity: 0,
+  color: '#cd7f32',
+  accentColor: '#f2b068',
+  damage: 22,
+  knockback: 2.5,
+  useTime: 0.25,
+  autoReuse: true,
+  projectileSpeed: 520,
+  useAmmo: 'arrow',
+  value: 160
 });
 reg({
   id: 'wooden_sword',
@@ -1068,6 +1136,7 @@ function regArmorSet(
 }
 
 regArmorSet('wood', 'Wood', 0, '#9c683b', '#694121', 1, 2, 1, 0.02, 50);
+regArmorSet('bronze', 'Bronze', 0, '#cd7f32', '#f2b068', 2, 3, 2, 0.03, 250);
 regArmorSet('iron', 'Iron', 0, '#b8b0a8', '#7a7570', 3, 4, 3, 0.04, 600);
 regArmorSet('gold', 'Gold', 1, '#e6b82e', '#fff085', 5, 6, 5, 0.06, 2000);
 regArmorSet('shadow', 'Shadow', 2, '#6d4ce6', '#b19cff', 6, 8, 6, 0.09, 5000);
