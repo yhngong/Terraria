@@ -86,38 +86,30 @@ export class Player {
 
   giveStarterKit(): void {
     this.inventory.fill(null);
-    this.inventory[0] = { id: 'zenith', count: 1 };
-    this.inventory[1] = { id: 'terra_blade', count: 1 };
-    this.inventory[2] = { id: 'solar_eruption', count: 1 };
-    this.inventory[3] = { id: 'sdmg', count: 1 };
-    this.inventory[4] = { id: 'tsunami', count: 1 };
-    this.inventory[5] = { id: 'last_prism', count: 1 };
-    this.inventory[6] = { id: 'razorblade_typhoon', count: 1 };
-    this.inventory[7] = { id: 'meowmere', count: 1 };
-    this.inventory[8] = { id: 'super_healing_potion', count: 50 };
-    this.inventory[9] = { id: 'cosmic_car_key', count: 1 };
+    this.inventory[0] = { id: 'nights_edge', count: 1 };
+    this.inventory[1] = { id: 'molten_fury', count: 1 };
+    this.inventory[2] = { id: 'demon_scythe', count: 1 };
+    this.inventory[3] = { id: 'minishark', count: 1 };
+    this.inventory[4] = { id: 'healing_potion', count: 30 };
+    this.inventory[5] = { id: 'molten_pickaxe', count: 1 };
+    this.inventory[6] = { id: 'molten_hamaxe', count: 1 };
+    this.inventory[7] = { id: 'cosmic_car_key', count: 1 };
+    this.inventory[8] = { id: 'flaming_arrow', count: 999 };
+    this.inventory[9] = { id: 'musket_ball', count: 999 };
 
-    // Extra ammo & tools in inventory row 2
-    this.inventory[10] = { id: 'holy_arrow', count: 9999 };
-    this.inventory[11] = { id: 'chlorophyte_bullet', count: 9999 };
-    this.inventory[12] = { id: 'picksaw', count: 1 };
-    this.inventory[13] = { id: 'nights_edge', count: 1 };
-    this.inventory[14] = { id: 'daedalus_stormbow', count: 1 };
-    this.inventory[15] = { id: 'nebula_blaze', count: 1 };
-
-    this.maxHp = 500;
-    this.hp = 500;
+    this.maxHp = 400;
+    this.hp = 400;
     this.maxMana = 200;
     this.mana = 200;
 
-    this.armor.head = { id: 'solar_helmet', count: 1 };
-    this.armor.chest = { id: 'solar_breastplate', count: 1 };
-    this.armor.legs = { id: 'solar_leggings', count: 1 };
+    this.armor.head = { id: 'molten_helmet', count: 1 };
+    this.armor.chest = { id: 'molten_breastplate', count: 1 };
+    this.armor.legs = { id: 'molten_leggings', count: 1 };
 
     this.accessories[0] = { id: 'cosmic_car_key', count: 1 };
-    this.accessories[1] = { id: 'solar_wings', count: 1 };
-    this.accessories[2] = { id: 'ankh_shield', count: 1 };
-    this.accessories[3] = { id: 'celestial_shell', count: 1 };
+    this.accessories[1] = { id: 'hermes_boots', count: 1 };
+    this.accessories[2] = { id: 'cobalt_shield', count: 1 };
+    this.accessories[3] = { id: 'cloud_in_a_bottle', count: 1 };
     this.accessories[4] = { id: 'band_of_regeneration', count: 1 };
   }
 

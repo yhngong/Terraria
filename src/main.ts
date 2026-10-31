@@ -72,7 +72,7 @@ class TerrariaGame {
     this.camY = this.player.y - this.canvas.height / (2 * this.zoom);
 
     this.hud.addChat(
-      'ZENITH & FLYING MOUNT ACTIVE! [WASD] 360° Flight, [Shift] Sonic Turbo Dash, [F] Switch Mount, [Click] Unleash Zenith!',
+      'FLYING MOUNT ACTIVE! [WASD] 360° Flight, [Shift] Sonic Turbo Dash, [F] Switch Mount! Gear auto-upgrades as you beat Boss Rush waves!',
       '#3be8d1'
     );
   }
@@ -309,7 +309,7 @@ class TerrariaGame {
     this.ctx.font = 'bold 13px monospace';
     this.ctx.fillStyle = '#3be8d1';
     this.ctx.fillText(
-      'STARTER ARSENAL: [1] The Zenith • [2] Terra Blade • [3] Solar Eruption • [4] S.D.M.G. • [5] Tsunami • [6] Last Prism • [7] Razorblade Typhoon • [8] Meowmere',
+      'PROGRESSION: Start with Night’s Edge, Molten Fury & Demon Scythe -> Auto-upgrade through Hardmode -> Defeat Moon Lord for THE ZENITH!',
       cx,
       478
     );

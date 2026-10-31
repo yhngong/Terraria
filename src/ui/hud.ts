@@ -419,6 +419,7 @@ export class HUD {
             {
               label: 'Endgame Gear',
               action: () => {
+                player.addItem('zenith', 1);
                 player.addItem('meowmere', 1);
                 player.addItem('sdmg', 1);
                 player.addItem('last_prism', 1);
@@ -437,7 +438,7 @@ export class HUD {
                 player.hp = 500;
                 player.maxMana = 200;
                 player.mana = 200;
-                this.addChat('Equipped Celestial Moon Lord Endgame Loadout!', '#05c8ff');
+                this.addChat('Equipped Celestial Moon Lord & Zenith Loadout!', '#05c8ff');
               }
             },
             {

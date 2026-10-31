@@ -1253,13 +1253,14 @@ export class BossManager {
         world.spawnDrop(dropX, dropY, 'celestial_sigil', 1);
         break;
       case 'moon_lord':
+        world.spawnDrop(dropX, dropY, 'zenith', 1);
         world.spawnDrop(dropX, dropY, 'meowmere', 1);
         world.spawnDrop(dropX, dropY, 'sdmg', 1);
         world.spawnDrop(dropX, dropY, 'last_prism', 1);
         world.spawnDrop(dropX, dropY, 'luminite_bar', 45);
         world.spawnDrop(dropX, dropY, 'solar_fragment', 45);
         world.spawnDrop(dropX, dropY, 'super_healing_potion', 25);
-        onChat('Victory! You have conquered the Moon Lord, Master of the Cosmos!', '#05c8ff');
+        onChat('Victory! You have conquered the Moon Lord and unlocked THE ZENITH!', '#05c8ff');
         break;
     }
 
