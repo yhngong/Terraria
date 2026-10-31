@@ -4,7 +4,7 @@ import { AudioManager, MusicTrack } from './core/audio';
 import { ParticleSystem } from './core/particles';
 import { SpriteAtlas } from './assets/sprites';
 import { World } from './world/world';
-import { generateWorld } from './world/worldgen';
+import { generateWorld, generateArenaWorld } from './world/worldgen';
 import { Player } from './entities/player';
 import { ProjectileManager } from './entities/projectiles';
 import { EnemyManager } from './entities/enemies';
@@ -50,7 +50,7 @@ class TerrariaGame {
     this.particles = new ParticleSystem();
     this.atlas = new SpriteAtlas();
 
-    this.initNewWorld(1337);
+    this.initNewWorld(1337, 'arena');
 
     requestAnimationFrame((t) => this.loop(t));
   }
@@ -60,9 +60,10 @@ class TerrariaGame {
     this.canvas.height = window.innerHeight;
   }
 
-  private initNewWorld(seed: number): void {
-    this.world = generateWorld(seed);
+  private initNewWorld(seed: number, mode: 'arena' | 'survival' = 'arena'): void {
+    this.world = mode === 'arena' ? generateArenaWorld() : generateWorld(seed);
     this.player = new Player(this.world.spawnX, this.world.spawnY);
+    this.player.mounted = true;
     this.projectiles = new ProjectileManager();
     this.enemies = new EnemyManager();
     this.npcs = new NPCManager();
@@ -73,7 +74,10 @@ class TerrariaGame {
     this.camX = this.player.x - this.canvas.width / (2 * this.zoom);
     this.camY = this.player.y - this.canvas.height / (2 * this.zoom);
 
-    this.hud.addChat('Welcome to Terraria! Right-click the Guide or press [K] for all 14 Bosses!', '#66ff8c');
+    this.hud.addChat(
+      'Flying Mount Active! Use [WASD/Space] to fly 360°, [Shift] to Turbo Boost, [R] to toggle mount, [F] to switch mount!',
+      '#3be8d1'
+    );
   }
 
   private saveGame(): void {
@@ -205,31 +209,42 @@ class TerrariaGame {
     const hasSave = !!localStorage.getItem(SAVE_KEY);
     const buttons = [
       {
-        label: 'New World (Survival Mode)',
-        y: 250,
-        color: '#28593a',
-        border: '#5ce68c',
+        label: '▶ Start 14-Boss Rush (Open Colosseum Arena + Flying Mount!)',
+        y: 235,
+        color: '#6b1d3a',
+        border: '#ff668c',
         action: () => {
-          this.initNewWorld(Math.floor(Math.random() * 999999));
+          this.initNewWorld(1337, 'arena');
           this.state = 'playing';
-          this.audio.play('craft');
+          this.bosses.startBossRush(this.player, this.audio, (m, c) => this.hud.addChat(m, c));
         }
       },
       {
-        label: 'New World + Open 14-Boss Arena & Loadout Selector',
-        y: 315,
+        label: 'Open Arena Sandbox (Free Flight Mount + Pick Any of 14 Bosses)',
+        y: 295,
         color: '#4c266b',
         border: '#d28cff',
         action: () => {
-          this.initNewWorld(Math.floor(Math.random() * 999999));
+          this.initNewWorld(1337, 'arena');
           this.hud.bossMenuOpen = true;
           this.state = 'playing';
           this.audio.play('craft');
         }
       },
       {
+        label: 'New Classic Survival World (Biomes, Mining & Crafting)',
+        y: 355,
+        color: '#28593a',
+        border: '#5ce68c',
+        action: () => {
+          this.initNewWorld(Math.floor(Math.random() * 999999), 'survival');
+          this.state = 'playing';
+          this.audio.play('craft');
+        }
+      },
+      {
         label: hasSave ? 'Continue Saved World' : 'No Saved World Yet',
-        y: 380,
+        y: 415,
         color: hasSave ? '#24476b' : '#282d38',
         border: hasSave ? '#6bb5ff' : '#555d6e',
         action: () => {
@@ -245,8 +260,8 @@ class TerrariaGame {
     const my = this.input.mouseY;
 
     for (const b of buttons) {
-      const bw = 460;
-      const bh = 48;
+      const bw = 540;
+      const bh = 46;
       const bx = cx - bw / 2;
       const hovered = pointInRect(mx, my, { x: bx, y: b.y, w: bw, h: bh });
 

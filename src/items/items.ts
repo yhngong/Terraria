@@ -1197,6 +1197,18 @@ reg({
   value: 140000,
   tooltip: '+6 defense, +15% all damage, +4 HP/sec regeneration'
 });
+reg({
+  id: 'cosmic_car_key',
+  name: 'Cosmic Car Key (UFO Mount)',
+  category: 'accessory',
+  iconType: 'accessory',
+  maxStack: 1,
+  rarity: 9,
+  color: '#3be8d1',
+  accentColor: '#ffd747',
+  value: 250000,
+  tooltip: 'Summons a ridable UFO Mount with infinite 360° flight! (Press R to toggle mount, F to cycle mount style)'
+});
 
 // =========================================================
 // 7. POTIONS & PERMANENT UPGRADES

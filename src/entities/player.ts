@@ -71,6 +71,12 @@ export class Player {
   // Godmode toggle for testing/sandbox
   godMode = false;
 
+  // Flying Mount System
+  mounted = true;
+  mountType: 'ufo' | 'fishron' | 'dragon' | 'airship' = 'ufo';
+  mountDashCooldown = 0;
+  mountHoverPhase = 0;
+
   constructor(spawnX: number, spawnY: number) {
     this.x = spawnX;
     this.y = spawnY;
@@ -80,14 +86,80 @@ export class Player {
 
   giveStarterKit(): void {
     this.inventory.fill(null);
-    this.inventory[0] = { id: 'copper_shortsword', count: 1 };
-    this.inventory[1] = { id: 'copper_pickaxe', count: 1 };
-    this.inventory[2] = { id: 'copper_axe', count: 1 };
-    this.inventory[3] = { id: 'wooden_bow', count: 1 };
-    this.inventory[4] = { id: 'torch', count: 25 };
-    this.inventory[5] = { id: 'lesser_healing_potion', count: 5 };
-    this.inventory[6] = { id: 'wood_platform', count: 40 };
-    this.inventory[7] = { id: 'wooden_arrow', count: 100 };
+    this.inventory[0] = { id: 'nights_edge', count: 1 };
+    this.inventory[1] = { id: 'bees_knees', count: 1 };
+    this.inventory[2] = { id: 'demon_scythe', count: 1 };
+    this.inventory[3] = { id: 'minishark', count: 1 };
+    this.inventory[4] = { id: 'healing_potion', count: 25 };
+    this.inventory[5] = { id: 'mana_potion', count: 25 };
+    this.inventory[6] = { id: 'molten_pickaxe', count: 1 };
+    this.inventory[7] = { id: 'cosmic_car_key', count: 1 };
+    this.inventory[8] = { id: 'flaming_arrow', count: 999 };
+    this.inventory[9] = { id: 'musket_ball', count: 999 };
+
+    this.maxHp = 400;
+    this.hp = 400;
+    this.maxMana = 200;
+    this.mana = 200;
+
+    this.armor.head = { id: 'molten_helmet', count: 1 };
+    this.armor.chest = { id: 'molten_breastplate', count: 1 };
+    this.armor.legs = { id: 'molten_leggings', count: 1 };
+
+    this.accessories[0] = { id: 'cosmic_car_key', count: 1 };
+    this.accessories[1] = { id: 'hermes_boots', count: 1 };
+    this.accessories[2] = { id: 'cobalt_shield', count: 1 };
+    this.accessories[3] = { id: 'band_of_regeneration', count: 1 };
+    this.accessories[4] = { id: 'grappling_hook', count: 1 };
+  }
+
+  upgradeForBossRushWave(wave: number): string | null {
+    // Auto-upgrade player arsenal at key Boss Rush milestones
+    if (wave === 7) {
+      // Entering Hardmode (The Twins)
+      this.inventory[0] = { id: 'excalibur', count: 1 };
+      this.inventory[1] = { id: 'daedalus_stormbow', count: 1 };
+      this.inventory[2] = { id: 'crystal_storm', count: 1 };
+      this.inventory[3] = { id: 'megashark', count: 1 };
+      this.inventory[4] = { id: 'greater_healing_potion', count: 30 };
+      this.inventory[8] = { id: 'holy_arrow', count: 999 };
+      this.armor.head = { id: 'titanium_helmet', count: 1 };
+      this.armor.chest = { id: 'titanium_breastplate', count: 1 };
+      this.armor.legs = { id: 'titanium_leggings', count: 1 };
+      this.accessories[2] = { id: 'ankh_shield', count: 1 };
+      this.maxHp = 450;
+      this.hp = 450;
+      return 'Hardmode Arsenal Unlocked: Excalibur, Daedalus Stormbow, Megashark & Titanium Armor!';
+    }
+    if (wave === 10) {
+      // Entering Plantera / Golem / Fishron
+      this.inventory[0] = { id: 'terra_blade', count: 1 };
+      this.inventory[1] = { id: 'tsunami', count: 1 };
+      this.inventory[2] = { id: 'razorblade_typhoon', count: 1 };
+      this.inventory[9] = { id: 'chlorophyte_bullet', count: 999 };
+      this.armor.head = { id: 'chlorophyte_helmet', count: 1 };
+      this.armor.chest = { id: 'chlorophyte_breastplate', count: 1 };
+      this.armor.legs = { id: 'chlorophyte_leggings', count: 1 };
+      this.accessories[3] = { id: 'celestial_shell', count: 1 };
+      this.maxHp = 500;
+      this.hp = 500;
+      return 'Jungle & Temple Arsenal Unlocked: Terra Blade, Tsunami, Razorblade Typhoon & Chlorophyte Armor!';
+    }
+    if (wave === 13) {
+      // Entering Lunatic Cultist & Moon Lord
+      this.inventory[0] = { id: 'meowmere', count: 1 };
+      this.inventory[1] = { id: 'sdmg', count: 1 };
+      this.inventory[2] = { id: 'last_prism', count: 1 };
+      this.inventory[3] = { id: 'solar_eruption', count: 1 };
+      this.inventory[4] = { id: 'super_healing_potion', count: 30 };
+      this.armor.head = { id: 'solar_helmet', count: 1 };
+      this.armor.chest = { id: 'solar_breastplate', count: 1 };
+      this.armor.legs = { id: 'solar_leggings', count: 1 };
+      this.maxHp = 500;
+      this.hp = 500;
+      return 'Celestial Endgame Arsenal Unlocked: Meowmere, S.D.M.G., Last Prism, Solar Eruption & Solar Armor!';
+    }
+    return null;
   }
 
   getBounds(): Rect {
@@ -448,6 +520,33 @@ export class Player {
     if (input.wasPressed('KeyJ')) this.quickMana(audio, particles);
     if (input.wasPressed('KeyB')) this.quickBuff(audio, particles);
 
+    // Flying Mount Toggle (KeyR) & Style Cycle (KeyF)
+    if (input.wasPressed('KeyR')) {
+      this.mounted = !this.mounted;
+      this.grapple.active = false;
+      this.fallStartY = this.y;
+      audio.play('grapple');
+      particles.spawn(this.x, this.y, '#3be8d1', 16, 120, 3.5, 0, true);
+      onChatMessage(
+        this.mounted
+          ? `Mounted ${this.getMountName()}! (Use WASD/Space to fly freely, Shift to Turbo Boost)`
+          : 'Dismounted.',
+        '#3be8d1'
+      );
+    }
+
+    if (input.wasPressed('KeyF')) {
+      const order: ('ufo' | 'fishron' | 'dragon' | 'airship')[] = ['ufo', 'fishron', 'dragon', 'airship'];
+      this.mountType = order[(order.indexOf(this.mountType) + 1) % order.length];
+      this.mounted = true;
+      audio.play('magic');
+      particles.spawn(this.x, this.y, '#ffd747', 16, 120, 3.5, 0, true);
+      onChatMessage(`Switched Flying Mount to: ${this.getMountName()}!`, '#ffd747');
+    }
+
+    if (this.mountDashCooldown > 0) this.mountDashCooldown -= dt;
+    this.mountHoverPhase += dt * 4.5;
+
     // Grappling Hook ('KeyE')
     const grappleRange = this.hasGrappleAvailable();
     if (input.wasPressed('KeyE') && grappleRange > 0) {
@@ -495,92 +594,149 @@ export class Player {
       }
     }
 
-    // Horizontal Movement
+    // Horizontal & Vertical Movement (including 360° Flying Mount!)
     const moveLeft = input.isDown('KeyA') || input.isDown('ArrowLeft');
     const moveRight = input.isDown('KeyD') || input.isDown('ArrowRight');
     const moveDown = input.isDown('KeyS') || input.isDown('ArrowDown');
     const jumpHeld = input.isDown('Space') || input.isDown('KeyW') || input.isDown('ArrowUp');
     const jumpJust =
       input.wasPressed('Space') || input.wasPressed('KeyW') || input.wasPressed('ArrowUp');
+    const dashPressed = input.wasPressed('ShiftLeft') || input.wasPressed('ShiftRight');
 
-    const maxSpeed = 165 * this.getSpeedMultiplier();
-    const accel = this.onGround ? 1200 : 750;
+    if (this.mounted) {
+      // Full 360° Omnidirectional Flying Mount Physics!
+      const mountSpeed = 310 * Math.max(1, this.getSpeedMultiplier() * 0.85);
+      const mountAccel = 1800;
 
-    if (!this.grapple.latched) {
       if (moveLeft && !moveRight) {
-        this.vx = Math.max(-maxSpeed, this.vx - accel * dt);
+        this.vx = Math.max(-mountSpeed, this.vx - mountAccel * dt);
         this.facing = -1;
       } else if (moveRight && !moveLeft) {
-        this.vx = Math.min(maxSpeed, this.vx + accel * dt);
+        this.vx = Math.min(mountSpeed, this.vx + mountAccel * dt);
         this.facing = 1;
       } else {
-        const friction = this.onGround ? 1100 : 320;
-        if (Math.abs(this.vx) <= friction * dt) this.vx = 0;
-        else this.vx -= Math.sign(this.vx) * friction * dt;
+        this.vx *= Math.pow(0.002, dt);
+        if (Math.abs(this.vx) < 4) this.vx = 0;
       }
-    }
 
-    if (this.onGround && Math.abs(this.vx) > 20) {
-      this.walkAnimTime += dt * (Math.abs(this.vx) / 110);
-      if (Math.abs(this.vx) > 195 && Math.random() < 0.35) {
-        particles.spawn(this.x, this.y + 12, '#e8f5ff', 1, 30, 2.5, 0);
+      if (jumpHeld && !moveDown) {
+        this.vy = Math.max(-mountSpeed, this.vy - mountAccel * dt);
+      } else if (moveDown && !jumpHeld) {
+        this.vy = Math.min(mountSpeed, this.vy + mountAccel * dt);
+      } else {
+        this.vy *= Math.pow(0.002, dt);
+        if (Math.abs(this.vy) < 4) this.vy = 0;
       }
-    } else {
-      this.walkAnimTime = 0;
-    }
 
-    // Jumping, Double Jump & Wings
-    this.maxFlightTime = this.getMaxFlightTime();
-    if (this.onGround) {
-      this.coyoteTimer = 0.1;
-      this.canDoubleJump = this.hasDoubleJump();
-      this.flightTimeLeft = this.maxFlightTime;
-    } else {
-      this.coyoteTimer -= dt;
-    }
+      // Shift Key: Mount Turbo Dash!
+      if (dashPressed && this.mountDashCooldown <= 0) {
+        this.mountDashCooldown = 0.75;
+        const dx = (moveRight ? 1 : moveLeft ? -1 : 0) || this.facing;
+        const dy = moveDown ? 1 : jumpHeld ? -1 : 0;
+        const len = Math.hypot(dx, dy) || 1;
+        this.vx = (dx / len) * 620;
+        this.vy = (dy / len) * 620;
+        this.invulnTimer = Math.max(this.invulnTimer, 0.25);
+        audio.play('laser');
+        particles.spawn(this.x, this.y, '#3be8d1', 18, 180, 4, 0, true);
+      }
 
-    if (!this.grapple.latched) {
-      if (jumpJust && this.coyoteTimer > 0) {
-        this.vy = -325;
-        this.onGround = false;
-        this.coyoteTimer = 0;
-        audio.play('jump');
-      } else if (jumpJust && this.canDoubleJump) {
-        this.vy = -310;
-        this.canDoubleJump = false;
-        particles.spawn(this.x, this.y + 12, '#ffffff', 12, 95, 3.5, 20);
-        audio.play('jump');
-      } else if (jumpHeld && !this.onGround && this.flightTimeLeft > 0) {
-        this.flightTimeLeft -= dt;
-        this.vy = Math.max(-235, this.vy - 980 * dt);
-        this.fallStartY = this.y;
-        if (Math.random() < 0.5) {
-          particles.spawn(this.x - this.facing * 6, this.y + 4, '#ffd966', 1, 45, 3, 40, true);
+      // Ambient Mount Thruster Particles
+      if (Math.random() < 0.65) {
+        const pCol =
+          this.mountType === 'dragon'
+            ? '#ff771c'
+            : this.mountType === 'fishron'
+            ? '#1cb3ff'
+            : this.mountType === 'airship'
+            ? '#ffd747'
+            : '#3be8d1';
+        particles.spawn(this.x + (Math.random() - 0.5) * 14, this.y + 14, pCol, 1, 35, 2.8, 25, true);
+      }
+
+      this.fallStartY = this.y;
+      // When mounted, pass dropThroughPlatform = !onGround || moveDown so flying down passes through platforms smoothly
+      this.moveAndCollide(dt, world, moveDown || this.vy < 0 || !this.onGround, audio, particles);
+    } else {
+      const maxSpeed = 165 * this.getSpeedMultiplier();
+      const accel = this.onGround ? 1200 : 750;
+
+      if (!this.grapple.latched) {
+        if (moveLeft && !moveRight) {
+          this.vx = Math.max(-maxSpeed, this.vx - accel * dt);
+          this.facing = -1;
+        } else if (moveRight && !moveLeft) {
+          this.vx = Math.min(maxSpeed, this.vx + accel * dt);
+          this.facing = 1;
+        } else {
+          const friction = this.onGround ? 1100 : 320;
+          if (Math.abs(this.vx) <= friction * dt) this.vx = 0;
+          else this.vx -= Math.sign(this.vx) * friction * dt;
         }
       }
-    }
 
-    // Gravity & Liquids
-    const ptx = Math.floor(this.x / TILE_SIZE);
-    const pty = Math.floor(this.y / TILE_SIZE);
-    const inLiquid = world.getLiquid(ptx, pty) > 60;
-    const liquidType = world.getLiquidType(ptx, pty);
-
-    if (!this.grapple.latched) {
-      const grav = inLiquid ? 320 : 760;
-      const maxFall = inLiquid ? 140 : jumpHeld && this.maxFlightTime > 0 ? 110 : 480;
-      this.vy = Math.min(maxFall, this.vy + grav * dt);
-      if (inLiquid && jumpHeld) {
-        this.vy = -150;
+      if (this.onGround && Math.abs(this.vx) > 20) {
+        this.walkAnimTime += dt * (Math.abs(this.vx) / 110);
+        if (Math.abs(this.vx) > 195 && Math.random() < 0.35) {
+          particles.spawn(this.x, this.y + 12, '#e8f5ff', 1, 30, 2.5, 0);
+        }
+      } else {
+        this.walkAnimTime = 0;
       }
-    }
 
-    if (inLiquid && liquidType === LiquidType.LAVA && !this.hasLavaImmunity()) {
-      this.takeDamage(45, 0, audio, particles, world);
-    }
+      // Jumping, Double Jump & Wings
+      this.maxFlightTime = this.getMaxFlightTime();
+      if (this.onGround) {
+        this.coyoteTimer = 0.1;
+        this.canDoubleJump = this.hasDoubleJump();
+        this.flightTimeLeft = this.maxFlightTime;
+      } else {
+        this.coyoteTimer -= dt;
+      }
 
-    // AABB Tile Collision
-    this.moveAndCollide(dt, world, moveDown, audio, particles);
+      if (!this.grapple.latched) {
+        if (jumpJust && this.coyoteTimer > 0) {
+          this.vy = -325;
+          this.onGround = false;
+          this.coyoteTimer = 0;
+          audio.play('jump');
+        } else if (jumpJust && this.canDoubleJump) {
+          this.vy = -310;
+          this.canDoubleJump = false;
+          particles.spawn(this.x, this.y + 12, '#ffffff', 12, 95, 3.5, 20);
+          audio.play('jump');
+        } else if (jumpHeld && !this.onGround && this.flightTimeLeft > 0) {
+          this.flightTimeLeft -= dt;
+          this.vy = Math.max(-235, this.vy - 980 * dt);
+          this.fallStartY = this.y;
+          if (Math.random() < 0.5) {
+            particles.spawn(this.x - this.facing * 6, this.y + 4, '#ffd966', 1, 45, 3, 40, true);
+          }
+        }
+      }
+
+      // Gravity & Liquids
+      const ptx = Math.floor(this.x / TILE_SIZE);
+      const pty = Math.floor(this.y / TILE_SIZE);
+      const inLiquid = world.getLiquid(ptx, pty) > 60;
+      const liquidType = world.getLiquidType(ptx, pty);
+
+      if (!this.grapple.latched) {
+        const grav = inLiquid ? 320 : 760;
+        const maxFall = inLiquid ? 140 : jumpHeld && this.maxFlightTime > 0 ? 110 : 480;
+        this.vy = Math.min(maxFall, this.vy + grav * dt);
+        if (inLiquid && jumpHeld) {
+          this.vy = -150;
+        }
+      }
+
+      if (inLiquid && liquidType === LiquidType.LAVA && !this.hasLavaImmunity()) {
+        this.takeDamage(45, 0, audio, particles, world);
+      }
+
+      // AABB Tile Collision
+      this.moveAndCollide(dt, world, moveDown, audio, particles);
+    }
 
     // Pickup Dropped Items
     for (let i = world.droppedItems.length - 1; i >= 0; i--) {
@@ -903,7 +1059,19 @@ export class Player {
       return;
     }
 
-    // 6. Consumable / Boss Summon
+    // 6. Consumable / Boss Summon / Mount Key
+    if (held.id === 'cosmic_car_key') {
+      this.mounted = !this.mounted;
+      this.useCooldown = 0.3;
+      audio.play('grapple');
+      particles.spawn(this.x, this.y, '#3be8d1', 16, 120, 3.5, 0, true);
+      onChatMessage(
+        this.mounted ? `Mounted ${this.getMountName()}!` : 'Dismounted.',
+        '#3be8d1'
+      );
+      return;
+    }
+
     if (held.category === 'consumable' || held.category === 'summon') {
       if (held.summonBoss) {
         onSummonBoss(held.summonBoss);
@@ -1162,6 +1330,19 @@ export class Player {
     }
   }
 
+  getMountName(): string {
+    switch (this.mountType) {
+      case 'ufo':
+        return 'Cosmic UFO Saucer';
+      case 'fishron':
+        return 'Cute Fishron Mount';
+      case 'dragon':
+        return 'Celestial Solar Dragon';
+      case 'airship':
+        return 'Flying Dutchman Airship';
+    }
+  }
+
   getMeleeHitbox(): Rect | null {
     const held = this.getHeldItem();
     if (!held || this.swingTimer <= 0 || (!held.damage && held.category !== 'melee')) {
@@ -1179,8 +1360,9 @@ export class Player {
   render(ctx: CanvasRenderingContext2D, camX: number, camY: number, atlas: SpriteAtlas): void {
     if (this.dead) return;
 
+    const bob = this.mounted ? Math.sin(this.mountHoverPhase) * 2.5 : 0;
     const sx = Math.floor(this.x - camX);
-    const sy = Math.floor(this.y - camY);
+    const sy = Math.floor(this.y - camY + bob);
 
     // Grapple chain & claw
     if (this.grapple.active) {
@@ -1201,8 +1383,39 @@ export class Player {
       ctx.globalAlpha = 0.55;
     }
 
-    // Wings on back
-    if (this.maxFlightTime > 0) {
+    // Back Mount Layer (Wings / Dragon / Fishron / Airship Hull behind player)
+    if (this.mounted) {
+      const flap = Math.sin(this.mountHoverPhase * 3.2) * 7;
+      if (this.mountType === 'fishron') {
+        ctx.fillStyle = 'rgba(190, 240, 255, 0.85)';
+        ctx.beginPath();
+        ctx.moveTo(sx - this.facing * 4, sy + 2);
+        ctx.lineTo(sx - this.facing * 22, sy - 10 + flap);
+        ctx.lineTo(sx - this.facing * 16, sy + 8 + flap * 0.5);
+        ctx.closePath();
+        ctx.fill();
+      } else if (this.mountType === 'dragon') {
+        ctx.fillStyle = '#ff771c';
+        ctx.beginPath();
+        ctx.moveTo(sx - this.facing * 4, sy);
+        ctx.lineTo(sx - this.facing * 26, sy - 14 + flap);
+        ctx.lineTo(sx - this.facing * 18, sy + 9 + flap * 0.5);
+        ctx.closePath();
+        ctx.fill();
+      } else if (this.mountType === 'airship') {
+        // Golden mast & sail behind player
+        ctx.fillStyle = '#6e431f';
+        ctx.fillRect(sx - 1, sy - 22, 3, 28);
+        ctx.fillStyle = 'rgba(255, 235, 160, 0.85)';
+        ctx.fillRect(sx - 10, sy - 20, 20, 12);
+      } else if (this.mountType === 'ufo') {
+        // Translucent Martian glass dome around upper torso
+        ctx.fillStyle = 'rgba(130, 245, 255, 0.32)';
+        ctx.beginPath();
+        ctx.arc(sx, sy + 2, 14, Math.PI, 0);
+        ctx.fill();
+      }
+    } else if (this.maxFlightTime > 0) {
       const wingColor = this.accessories.some((a) => a?.id === 'solar_wings')
         ? '#ff771c'
         : '#d8f0ff';
@@ -1216,7 +1429,7 @@ export class Player {
       ctx.fill();
     }
 
-    const legOffset = Math.sin(this.walkAnimTime * 10) * 3;
+    const legOffset = this.mounted ? 0 : Math.sin(this.walkAnimTime * 10) * 3;
     const headDef = this.armor.head ? ITEMS[this.armor.head.id] : null;
     const chestDef = this.armor.chest ? ITEMS[this.armor.chest.id] : null;
     const legsDef = this.armor.legs ? ITEMS[this.armor.legs.id] : null;
@@ -1253,6 +1466,45 @@ export class Player {
       ctx.fillStyle = '#6e4224';
       ctx.fillRect(sx - 6, sy - 14, 12, 4);
       ctx.fillRect(this.facing > 0 ? sx - 6 : sx + 3, sy - 10, 3, 4);
+    }
+
+    // Foreground Mount Layer (UFO Saucer Rim / Fishron Body / Dragon Body / Airship Deck)
+    if (this.mounted) {
+      if (this.mountType === 'ufo') {
+        // Metallic Martian UFO Saucer
+        ctx.fillStyle = '#7e8fa6';
+        ctx.fillRect(sx - 18, sy + 4, 36, 7);
+        ctx.fillStyle = '#b8cad9';
+        ctx.fillRect(sx - 14, sy + 2, 28, 3);
+        // Glowing neon lights along saucer rim
+        const pulse = Math.floor(performance.now() * 0.01) % 2 === 0;
+        ctx.fillStyle = pulse ? '#3be8d1' : '#ffd747';
+        ctx.fillRect(sx - 14, sy + 6, 4, 3);
+        ctx.fillRect(sx - 2, sy + 6, 4, 3);
+        ctx.fillRect(sx + 10, sy + 6, 4, 3);
+        // Bottom anti-gravity beam glow
+        ctx.fillStyle = 'rgba(59, 232, 209, 0.55)';
+        ctx.fillRect(sx - 9, sy + 11, 18, 4);
+      } else if (this.mountType === 'fishron') {
+        ctx.fillStyle = '#1cb89c';
+        ctx.fillRect(sx - 16, sy + 4, 32, 9);
+        ctx.fillStyle = '#ff59b8';
+        ctx.fillRect(sx + this.facing * 10, sy + 2, 7, 5);
+        ctx.fillStyle = '#ffee38';
+        ctx.fillRect(sx + this.facing * 12, sy + 4, 3, 3);
+      } else if (this.mountType === 'dragon') {
+        ctx.fillStyle = '#d94814';
+        ctx.fillRect(sx - 18, sy + 4, 36, 8);
+        ctx.fillStyle = '#ffee55';
+        ctx.fillRect(sx - 12, sy + 6, 24, 4);
+        ctx.fillRect(sx + this.facing * 14, sy + 1, 8, 7);
+      } else if (this.mountType === 'airship') {
+        ctx.fillStyle = '#8c5425';
+        ctx.fillRect(sx - 19, sy + 4, 38, 9);
+        ctx.fillStyle = '#ffd747';
+        ctx.fillRect(sx - 20, sy + 4, 40, 2);
+        ctx.fillRect(sx - 12, sy + 8, 24, 2);
+      }
     }
 
     // Swinging Held Weapon / Tool

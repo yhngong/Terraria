@@ -196,6 +196,56 @@ let nextPartId = 10000;
 export class BossManager {
   activeBoss: BossInstance | null = null;
 
+  // 14-Boss Rush Mode State
+  bossRushActive = false;
+  bossRushWave = 0; // 1..14
+  bossRushCountdown = 0;
+  bossRushTimer = 0;
+  bossRushCompleted = false;
+
+  startBossRush(
+    player: Player,
+    audio: AudioManager,
+    onChat: (msg: string, color?: string) => void
+  ): void {
+    this.bossRushActive = true;
+    this.bossRushCompleted = false;
+    this.bossRushWave = 1;
+    this.bossRushTimer = 0;
+    this.bossRushCountdown = 0;
+    player.mounted = true;
+    player.hp = player.maxHp;
+    player.mana = player.maxMana;
+    player.potionCooldown = 0;
+    onChat('=== 14-BOSS RUSH STARTED! Wave 1/14: King Slime ===', '#ffd747');
+    this.summon(BOSS_CATALOG[0].id, player, audio, onChat);
+  }
+
+  advanceBossRushNow(
+    player: Player,
+    audio: AudioManager,
+    onChat: (msg: string, color?: string) => void
+  ): void {
+    if (!this.bossRushActive) {
+      this.startBossRush(player, audio, onChat);
+      return;
+    }
+    if (this.activeBoss) {
+      this.bossRushWave = Math.min(14, this.bossRushWave + 1);
+    }
+    this.bossRushCountdown = 0;
+    const entry = BOSS_CATALOG[this.bossRushWave - 1];
+    if (entry) {
+      player.hp = player.maxHp;
+      player.mana = player.maxMana;
+      player.potionCooldown = 0;
+      const upg = player.upgradeForBossRushWave(this.bossRushWave);
+      if (upg) onChat(upg, '#05c8ff');
+      onChat(`=== BOSS RUSH WAVE ${this.bossRushWave}/14: ${entry.name} ===`, '#ffd747');
+      this.summon(entry.id, player, audio, onChat);
+    }
+  }
+
   summon(
     type: string,
     player: Player,
@@ -846,12 +896,30 @@ export class BossManager {
     particles: ParticleSystem,
     onChat: (msg: string, color?: string) => void
   ): void {
+    if (this.bossRushActive && !this.bossRushCompleted) {
+      this.bossRushTimer += dt;
+      if (!this.activeBoss && !player.dead && this.bossRushCountdown > 0) {
+        this.bossRushCountdown -= dt;
+        if (this.bossRushCountdown <= 0) {
+          const entry = BOSS_CATALOG[this.bossRushWave - 1];
+          if (entry) {
+            onChat(`=== BOSS RUSH WAVE ${this.bossRushWave}/14: ${entry.name} ===`, '#ffd747');
+            this.summon(entry.id, player, audio, onChat);
+          }
+        }
+      }
+    }
+
     const b = this.activeBoss;
     if (!b) return;
 
     if (player.dead) {
-      // Boss despawns if player dies
+      // Boss despawns if player dies; in Boss Rush, queue same wave after respawn!
       this.activeBoss = null;
+      if (this.bossRushActive) {
+        this.bossRushCountdown = 2.0;
+        onChat(`Wave ${this.bossRushWave} will restart as soon as you respawn!`, '#ff9696');
+      }
       return;
     }
 
@@ -1176,6 +1244,35 @@ export class BossManager {
     }
 
     this.activeBoss = null;
+
+    if (this.bossRushActive) {
+      player.hp = player.maxHp;
+      player.mana = player.maxMana;
+      player.potionCooldown = 0;
+
+      if (this.bossRushWave < 14) {
+        this.bossRushWave++;
+        this.bossRushCountdown = 3.5;
+        const upg = player.upgradeForBossRushWave(this.bossRushWave);
+        if (upg) {
+          onChat(upg, '#05c8ff');
+        }
+        const nextEntry = BOSS_CATALOG[this.bossRushWave - 1];
+        onChat(
+          `Full HP/Mana Restored! Next Up in 3.5s -> Wave ${this.bossRushWave}/14: ${nextEntry?.name}!`,
+          '#ffd747'
+        );
+      } else {
+        this.bossRushCompleted = true;
+        this.bossRushActive = false;
+        const mins = Math.floor(this.bossRushTimer / 60);
+        const secs = (this.bossRushTimer % 60).toFixed(1);
+        onChat(
+          `CHAMPION! All 14 Bosses Conquered! Final Boss Rush Time: ${mins}m ${secs}s!`,
+          '#05c8ff'
+        );
+      }
+    }
   }
 
   // =========================================================

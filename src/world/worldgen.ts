@@ -3,6 +3,126 @@ import { TileId, WallId, LiquidType } from './tiles';
 import { World } from './world';
 import { ItemStack } from '../items/items';
 
+export function generateArenaWorld(): World {
+  const world = new World(840, 280);
+  const w = world.width;
+  const h = world.height;
+  const centerX = Math.floor(w * 0.5);
+  const floorY = 192;
+
+  // Set surfaceY to floorY so the entire sky/arena is brightly lit and open
+  for (let x = 0; x < w; x++) {
+    world.surfaceY[x] = floorY;
+  }
+
+  // 1. Solid Arena Floor & Grand Foundation
+  for (let x = 0; x < w; x++) {
+    for (let y = floorY; y < h; y++) {
+      if (y === floorY) {
+        world.setTile(x, y, x >= 100 && x <= w - 100 ? TileId.STONE_BRICK : TileId.GRASS);
+      } else if (y < floorY + 6) {
+        world.setTile(x, y, TileId.STONE_BRICK);
+      } else if (y === h - 1) {
+        world.setTile(x, y, TileId.LIHZAHRD_BRICK);
+      } else {
+        world.setTile(x, y, TileId.STONE);
+      }
+    }
+  }
+
+  // 2. Grand Colosseum Boundary Towers on Left (x=100) and Right (x=w-100)
+  for (const bx of [100, w - 100]) {
+    for (let y = 55; y <= floorY; y++) {
+      for (let dx = -3; dx <= 3; dx++) {
+        if (Math.abs(dx) === 3 || y === 55) {
+          world.setTile(bx + dx, y, TileId.DUNGEON_BRICK);
+        } else {
+          world.setWall(bx + dx, y, WallId.DUNGEON);
+          if (y % 12 === 0) {
+            world.setTile(bx + dx, y, TileId.TORCH);
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Multi-Tiered Wide-Open Boss Rush Sky Platforms (6 tiers, 18 tiles apart vertically)
+  const platformYLevels = [84, 102, 120, 138, 156, 174];
+  for (const py of platformYLevels) {
+    for (let x = 115; x <= w - 115; x++) {
+      // Leave periodic fast-drop gaps every 90 tiles
+      if ((x - 115) % 90 >= 82) continue;
+      world.setTile(x, py, TileId.PLATFORM);
+
+      // Arena buffs & lighting every 36 tiles
+      if (x % 36 === 0) {
+        world.setTile(x, py - 1, TileId.CAMPFIRE);
+      } else if (x % 18 === 0) {
+        world.setTile(x, py - 1, TileId.TORCH);
+      }
+    }
+  }
+
+  // 4. Decorative Background Pillars in the Colosseum
+  for (let px = 160; px <= w - 160; px += 70) {
+    for (let y = 84; y < floorY; y++) {
+      world.setWall(px, y, WallId.BRICK);
+      world.setWall(px + 1, y, WallId.BRICK);
+    }
+  }
+
+  // 5. Central Champion's Pavilion at Spawn (centerX, y = 156)
+  const spawnYTile = 156;
+  for (let dx = -14; dx <= 14; dx++) {
+    world.setTile(centerX + dx, spawnYTile, TileId.STONE_BRICK);
+    for (let dy = -6; dy <= -1; dy++) {
+      world.setWall(centerX + dx, spawnYTile + dy, WallId.GLASS);
+    }
+  }
+  world.setTile(centerX - 10, spawnYTile - 1, TileId.WORK_BENCH);
+  world.setTile(centerX - 8, spawnYTile - 1, TileId.MYTHRIL_ANVIL);
+  world.setTile(centerX - 6, spawnYTile - 1, TileId.ADAMANTITE_FORGE);
+  world.setTile(centerX - 4, spawnYTile - 1, TileId.ANCIENT_MANIPULATOR);
+  world.setTile(centerX + 4, spawnYTile - 1, TileId.CAMPFIRE);
+  world.setTile(centerX + 7, spawnYTile - 1, TileId.CHEST);
+  world.setTile(centerX + 10, spawnYTile - 1, TileId.LIHZAHRD_ALTAR);
+
+  // Stock the Armory Chest with top weapons & potions
+  const armory = world.getOrCreateChest(centerX + 7, spawnYTile - 1);
+  const armoryItems: [string, number][] = [
+    ['meowmere', 1],
+    ['terra_blade', 1],
+    ['solar_eruption', 1],
+    ['sdmg', 1],
+    ['tsunami', 1],
+    ['last_prism', 1],
+    ['razorblade_typhoon', 1],
+    ['nights_edge', 1],
+    ['daedalus_stormbow', 1],
+    ['megashark', 1],
+    ['super_healing_potion', 50],
+    ['mana_potion', 50],
+    ['holy_arrow', 999],
+    ['chlorophyte_bullet', 999],
+    ['ironskin_potion', 20],
+    ['swiftness_potion', 20],
+    ['regeneration_potion', 20],
+    ['cosmic_car_key', 1]
+  ];
+  armoryItems.forEach(([id, count], idx) => {
+    armory[idx] = { id, count };
+  });
+
+  world.spawnX = centerX * TILE_SIZE;
+  world.spawnY = (spawnYTile - 3) * TILE_SIZE;
+  world.dungeonX = 112;
+  world.dungeonY = floorY - 1;
+  world.templeX = w - 112;
+  world.templeY = floorY - 1;
+
+  return world;
+}
+
 export function generateWorld(seed: number = Date.now()): World {
   const world = new World(840, 320);
   const rng = new SeededRNG(seed);
