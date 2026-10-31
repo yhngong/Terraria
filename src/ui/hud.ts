@@ -969,7 +969,7 @@ export class HUD {
       ctx.fillStyle = 'rgba(200, 220, 255, 0.88)';
       ctx.fillText(
         this.isArenaMode
-          ? 'Controls: [WASD/Space] 360° Mount Flight  [Shift] Mount Turbo Boost  [R] Toggle Mount  [F] Switch Mount (UFO/Fishron/Dragon/Ship)  [L-Click] Attack  [H] Heal  [K] 14 Bosses & Gear'
+          ? `Controls: [WASD/Space] 360° Mount Flight  [Shift] Mount Turbo Boost  [R] Toggle Mount  [F] Switch Mount (UFO/Fishron/Dragon/Ship)  [L-Click] Attack  [H] Heal  [K] ${BOSS_CATALOG.length} Bosses & Gear`
           : 'Controls: [WASD/Space] Move & Jump  [I] Inventory & Crafting  [L-Click] Mine / Place / Attack  [R-Click] Open Chest / Door  [E] Grapple  [H] Quick Heal  [M] World Map',
         16,
         sh - 10

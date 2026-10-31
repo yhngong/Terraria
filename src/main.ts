@@ -8,7 +8,7 @@ import { generateWorld, generateArenaWorld } from './world/worldgen';
 import { Player } from './entities/player';
 import { ProjectileManager } from './entities/projectiles';
 import { EnemyManager } from './entities/enemies';
-import { BossManager } from './entities/bosses';
+import { BossManager, BOSS_CATALOG } from './entities/bosses';
 import { HUD } from './ui/hud';
 import { ITEMS } from './items/items';
 
@@ -236,7 +236,7 @@ class TerrariaGame {
     this.ctx.font = 'bold 16px monospace';
     this.ctx.fillStyle = '#ffd747';
     this.ctx.fillText(
-      '⚡ GRAND COLOSSEUM ARENA • 14 BOSS GAUNTLET • 360° FLYING MOUNTS • THE ZENITH ⚡',
+      `⚡ GRAND COLOSSEUM ARENA • ${BOSS_CATALOG.length} BOSS GAUNTLET • CALAMITY MOD • 360° FLYING MOUNTS ⚡`,
       cx,
       182
     );
@@ -244,7 +244,7 @@ class TerrariaGame {
     const hasSave = !!localStorage.getItem(SAVE_KEY);
     const buttons = [
       {
-        label: '⚔️ START 14-BOSS RUSH GAUNTLET (Grand Colosseum + Flying Mount!)',
+        label: `⚔️ START ${BOSS_CATALOG.length}-BOSS RUSH GAUNTLET (Vanilla + Calamity Mod!)`,
         y: 225,
         color: '#6b1236',
         border: '#ff3875',
@@ -255,7 +255,7 @@ class TerrariaGame {
         }
       },
       {
-        label: '🛸 OPEN ARENA SANDBOX (Free Flight + Summon Any of 14 Bosses)',
+        label: `🛸 OPEN ARENA SANDBOX (Free Flight + Summon Any of ${BOSS_CATALOG.length} Bosses)`,
         y: 285,
         color: '#3c1e6e',
         border: '#c77dff',
@@ -319,13 +319,13 @@ class TerrariaGame {
     this.ctx.font = 'bold 13px monospace';
     this.ctx.fillStyle = '#3be8d1';
     this.ctx.fillText(
-      'PROGRESSION: Start with Night’s Edge, Molten Fury & Demon Scythe -> Auto-upgrade through Hardmode -> Defeat Moon Lord for THE ZENITH!',
+      'PROGRESSION: Pre-HM -> Hardmode -> Moon Lord (Zenith) -> Calamity Mod (Auric Tesla, Demonshade & Ark of the Cosmos)!',
       cx,
       478
     );
     this.ctx.fillStyle = '#ff96ff';
     this.ctx.fillText(
-      'ALL 14 BOSSES: King Slime • Eye of Cthulhu • Eater of Worlds • Queen Bee • Skeletron • Wall of Flesh • The Twins • Destroyer • Skeletron Prime • Plantera • Golem • Duke Fishron • Lunatic Cultist • Moon Lord',
+      `ALL ${BOSS_CATALOG.length} BOSSES: 14 Vanilla Bosses (King Slime -> Moon Lord) + 4 Calamity Bosses (Providence • Devourer of Gods • Yharon • Supreme Calamitas)`,
       cx,
       504
     );
