@@ -918,8 +918,8 @@ export class HUD {
       ctx.textAlign = 'left';
     }
 
-    // 5. Chat & Event Log (Bottom Left)
-    let chatY = sh - 70;
+    // 5. Chat & Event Log (Bottom Left — raised above joystick on mobile)
+    let chatY = input.isMobile ? sh - 195 : sh - 70;
     ctx.font = 'bold 12px monospace';
     for (let i = this.chatLog.length - 1; i >= 0; i--) {
       const c = this.chatLog[i];
@@ -934,8 +934,8 @@ export class HUD {
     }
     ctx.globalAlpha = 1;
 
-    // Controls quick hint bar at bottom-left
-    if (this.controlsHelpOpen) {
+    // Controls quick hint bar at bottom-left (Desktop only)
+    if (this.controlsHelpOpen && !input.isMobile) {
       ctx.font = '11px monospace';
       ctx.fillStyle = 'rgba(200, 220, 255, 0.88)';
       ctx.fillText(
@@ -943,6 +943,11 @@ export class HUD {
         16,
         sh - 10
       );
+    }
+
+    // Mobile Virtual Controls Overlay (ONLY rendered on mobile devices!)
+    if (input.isMobile) {
+      this.renderMobileControls(ctx, input);
     }
 
     // 6. Active NPC Dialogue / Shop Window
@@ -984,6 +989,95 @@ export class HUD {
     if (this.hoveredTooltip) {
       this.renderTooltip(ctx, this.hoveredTooltip);
     }
+  }
+
+  private renderMobileControls(ctx: CanvasRenderingContext2D, input: InputManager): void {
+    const layout = input.getMobileLayout();
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 1. Virtual Joystick (Bottom-Left)
+    ctx.beginPath();
+    ctx.arc(layout.joyX, layout.joyY, layout.joyRadius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(16, 24, 44, 0.52)';
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = input.joyActive ? '#3be8d1' : 'rgba(120, 170, 235, 0.65)';
+    ctx.stroke();
+
+    // Inner guide crosshairs
+    ctx.strokeStyle = 'rgba(120, 170, 235, 0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(layout.joyX - layout.joyRadius * 0.65, layout.joyY);
+    ctx.lineTo(layout.joyX + layout.joyRadius * 0.65, layout.joyY);
+    ctx.moveTo(layout.joyX, layout.joyY - layout.joyRadius * 0.65);
+    ctx.lineTo(layout.joyX, layout.joyY + layout.joyRadius * 0.65);
+    ctx.stroke();
+
+    // Movable Joystick Thumb Knob
+    const knobX = layout.joyX + input.joyX * (layout.joyRadius * 0.62);
+    const knobY = layout.joyY + input.joyY * (layout.joyRadius * 0.62);
+    ctx.beginPath();
+    ctx.arc(knobX, knobY, 24, 0, Math.PI * 2);
+    ctx.fillStyle = input.joyActive ? 'rgba(59, 232, 209, 0.85)' : 'rgba(92, 168, 255, 0.68)';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    // 2. Attack Button (Bottom-Right)
+    ctx.beginPath();
+    ctx.arc(layout.atkX, layout.atkY, layout.atkRadius, 0, Math.PI * 2);
+    ctx.fillStyle = input.mobileAttackHeld
+      ? 'rgba(255, 56, 92, 0.85)'
+      : 'rgba(140, 24, 58, 0.65)';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = input.mobileAttackHeld ? '#ffd747' : '#ff668c';
+    ctx.stroke();
+
+    if (input.attackAimActive) {
+      const ax = layout.atkX + Math.cos(input.attackAimAngle) * (layout.atkRadius + 12);
+      const ay = layout.atkY + Math.sin(input.attackAimAngle) * (layout.atkRadius + 12);
+      ctx.beginPath();
+      ctx.arc(ax, ay, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd747';
+      ctx.fill();
+    }
+
+    ctx.font = 'bold 15px monospace';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('ATK', layout.atkX, layout.atkY);
+
+    // 3. Inventory Button (Left of Attack Button)
+    ctx.beginPath();
+    ctx.arc(layout.invX, layout.invY, layout.invRadius, 0, Math.PI * 2);
+    ctx.fillStyle = this.inventoryOpen
+      ? 'rgba(72, 118, 210, 0.88)'
+      : 'rgba(28, 44, 82, 0.68)';
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = this.inventoryOpen ? '#ffd747' : '#7ea8ff';
+    ctx.stroke();
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('INV', layout.invX, layout.invY);
+
+    // 4. Dash Button (Above Attack Button)
+    ctx.beginPath();
+    ctx.arc(layout.dashX, layout.dashY, layout.dashRadius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(20, 78, 92, 0.68)';
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#3be8d1';
+    ctx.stroke();
+    ctx.font = 'bold 11px monospace';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('DASH', layout.dashX, layout.dashY);
+
+    ctx.restore();
   }
 
   private renderNPCModal(

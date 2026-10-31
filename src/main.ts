@@ -155,6 +155,7 @@ class TerrariaGame {
   private loop(now: number): void {
     const dt = Math.min(0.05, (now - this.lastTime) / 1000);
     this.lastTime = now;
+    this.input.controlsEnabled = this.state === 'playing';
 
     if (this.state === 'menu') {
       this.updateAndRenderMenu(dt);
@@ -285,7 +286,7 @@ class TerrariaGame {
     const my = this.input.mouseY;
 
     for (const b of buttons) {
-      const bw = 580;
+      const bw = Math.min(580, sw - 28);
       const bh = 48;
       const bx = cx - bw / 2;
       const hovered = pointInRect(mx, my, { x: bx, y: b.y, w: bw, h: bh });
@@ -349,6 +350,52 @@ class TerrariaGame {
     const viewW = this.canvas.width / this.zoom;
     const viewH = this.canvas.height / this.zoom;
     this.input.updateWorldMouse(this.camX, this.camY, this.zoom);
+
+    // Mobile Attack Button Auto-Aim / Directional Aim
+    if (this.input.mobileAttackHeld || this.input.mobileAttackJustPressed) {
+      if (this.input.attackAimActive) {
+        this.input.worldMouseX = this.player.x + Math.cos(this.input.attackAimAngle) * 180;
+        this.input.worldMouseY = this.player.y + Math.sin(this.input.attackAimAngle) * 180;
+      } else {
+        // Auto-aim at nearest vulnerable boss part or enemy, or fallback to joystick/facing direction
+        let bestX = this.player.x + this.player.facing * 160;
+        let bestY = this.player.y;
+        let bestDist = Infinity;
+
+        if (this.bosses.activeBoss) {
+          for (const bp of this.bosses.activeBoss.parts) {
+            if (!bp.invulnerable && bp.hp > 0) {
+              const d = Math.hypot(bp.x - this.player.x, bp.y - this.player.y);
+              if (d < bestDist) {
+                bestDist = d;
+                bestX = bp.x;
+                bestY = bp.y;
+              }
+            }
+          }
+        }
+        if (bestDist === Infinity) {
+          for (const e of this.enemies.enemies) {
+            if (e.hp > 0) {
+              const d = Math.hypot(e.x - this.player.x, e.y - this.player.y);
+              if (d < bestDist) {
+                bestDist = d;
+                bestX = e.x;
+                bestY = e.y;
+              }
+            }
+          }
+        }
+        if (bestDist === Infinity && this.input.joyActive && (Math.abs(this.input.joyX) > 0.15 || Math.abs(this.input.joyY) > 0.15)) {
+          bestX = this.player.x + this.input.joyX * 160;
+          bestY = this.player.y + this.input.joyY * 160;
+        }
+        this.input.worldMouseX = bestX;
+        this.input.worldMouseY = bestY;
+      }
+      this.input.tileMouseX = Math.floor(this.input.worldMouseX / TILE_SIZE);
+      this.input.tileMouseY = Math.floor(this.input.worldMouseY / TILE_SIZE);
+    }
 
     const summonCallback = (bossId: string, sx?: number, sy?: number) => {
       this.bosses.summon(

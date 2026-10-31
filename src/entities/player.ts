@@ -624,13 +624,20 @@ export class Player {
       }
     }
 
-    // Horizontal & Vertical Movement (including 360° Flying Mount!)
-    const moveLeft = input.isDown('KeyA') || input.isDown('ArrowLeft');
-    const moveRight = input.isDown('KeyD') || input.isDown('ArrowRight');
-    const moveDown = input.isDown('KeyS') || input.isDown('ArrowDown');
-    const jumpHeld = input.isDown('Space') || input.isDown('KeyW') || input.isDown('ArrowUp');
+    // Horizontal & Vertical Movement (including 360° Flying Mount & Mobile Joystick!)
+    const moveLeft = input.isDown('KeyA') || input.isDown('ArrowLeft') || input.joyX < -0.22;
+    const moveRight = input.isDown('KeyD') || input.isDown('ArrowRight') || input.joyX > 0.22;
+    const moveDown = input.isDown('KeyS') || input.isDown('ArrowDown') || input.joyY > 0.25;
+    const jumpHeld =
+      input.isDown('Space') ||
+      input.isDown('KeyW') ||
+      input.isDown('ArrowUp') ||
+      input.joyY < -0.25;
     const jumpJust =
-      input.wasPressed('Space') || input.wasPressed('KeyW') || input.wasPressed('ArrowUp');
+      input.wasPressed('Space') ||
+      input.wasPressed('KeyW') ||
+      input.wasPressed('ArrowUp') ||
+      (input.joyActive && input.joyY < -0.55 && this.onGround);
     const dashPressed = input.wasPressed('ShiftLeft') || input.wasPressed('ShiftRight');
 
     if (this.mounted) {
@@ -638,31 +645,55 @@ export class Player {
       const mountSpeed = 310 * Math.max(1, this.getSpeedMultiplier() * 0.85);
       const mountAccel = 1800;
 
-      if (moveLeft && !moveRight) {
-        this.vx = Math.max(-mountSpeed, this.vx - mountAccel * dt);
-        this.facing = -1;
-      } else if (moveRight && !moveLeft) {
-        this.vx = Math.min(mountSpeed, this.vx + mountAccel * dt);
-        this.facing = 1;
+      if (input.joyActive && (Math.abs(input.joyX) > 0.08 || Math.abs(input.joyY) > 0.08)) {
+        const targetVx = input.joyX * mountSpeed;
+        const targetVy = input.joyY * mountSpeed;
+        this.vx += (targetVx - this.vx) * Math.min(1, dt * 10);
+        this.vy += (targetVy - this.vy) * Math.min(1, dt * 10);
+        if (Math.abs(input.joyX) > 0.12) {
+          this.facing = input.joyX > 0 ? 1 : -1;
+        }
       } else {
-        this.vx *= Math.pow(0.002, dt);
-        if (Math.abs(this.vx) < 4) this.vx = 0;
+        if (moveLeft && !moveRight) {
+          this.vx = Math.max(-mountSpeed, this.vx - mountAccel * dt);
+          this.facing = -1;
+        } else if (moveRight && !moveLeft) {
+          this.vx = Math.min(mountSpeed, this.vx + mountAccel * dt);
+          this.facing = 1;
+        } else {
+          this.vx *= Math.pow(0.002, dt);
+          if (Math.abs(this.vx) < 4) this.vx = 0;
+        }
+
+        if (jumpHeld && !moveDown) {
+          this.vy = Math.max(-mountSpeed, this.vy - mountAccel * dt);
+        } else if (moveDown && !jumpHeld) {
+          this.vy = Math.min(mountSpeed, this.vy + mountAccel * dt);
+        } else {
+          this.vy *= Math.pow(0.002, dt);
+          if (Math.abs(this.vy) < 4) this.vy = 0;
+        }
       }
 
-      if (jumpHeld && !moveDown) {
-        this.vy = Math.max(-mountSpeed, this.vy - mountAccel * dt);
-      } else if (moveDown && !jumpHeld) {
-        this.vy = Math.min(mountSpeed, this.vy + mountAccel * dt);
-      } else {
-        this.vy *= Math.pow(0.002, dt);
-        if (Math.abs(this.vy) < 4) this.vy = 0;
-      }
-
-      // Shift Key: Mount Turbo Dash!
+      // Shift Key / Mobile Dash Button: Mount Turbo Dash!
       if (dashPressed && this.mountDashCooldown <= 0) {
         this.mountDashCooldown = 0.65;
-        const dx = (moveRight ? 1 : moveLeft ? -1 : 0) || this.facing;
-        const dy = moveDown ? 1 : jumpHeld ? -1 : 0;
+        const dx =
+          (input.joyActive && Math.abs(input.joyX) > 0.15
+            ? input.joyX
+            : moveRight
+            ? 1
+            : moveLeft
+            ? -1
+            : 0) || this.facing;
+        const dy =
+          input.joyActive && Math.abs(input.joyY) > 0.15
+            ? input.joyY
+            : moveDown
+            ? 1
+            : jumpHeld
+            ? -1
+            : 0;
         const len = Math.hypot(dx, dy) || 1;
         this.vx = (dx / len) * 680;
         this.vy = (dy / len) * 680;
@@ -825,10 +856,12 @@ export class Player {
       }
     }
 
-    // Left-click Item Use (Weapons, Tools, Blocks, Consumables, Summons)
-    if (!uiBlockingMouse) {
+    // Left-click or Mobile Attack Button Item Use (Weapons, Tools, Blocks, Consumables, Summons)
+    if (!uiBlockingMouse || input.mobileAttackHeld || input.mobileAttackJustPressed) {
       const held = this.getHeldItem();
-      const trigger = held?.autoReuse ? input.mouseLeft : input.mouseLeftJustPressed;
+      const trigger = held?.autoReuse
+        ? (input.mouseLeft && !uiBlockingMouse) || input.mobileAttackHeld
+        : (input.mouseLeftJustPressed && !uiBlockingMouse) || input.mobileAttackJustPressed;
       if (held && trigger && this.useCooldown <= 0) {
         this.useHeldItem(
           dt,
@@ -841,7 +874,7 @@ export class Player {
           onSummonBoss,
           onChatMessage
         );
-      } else if (!input.mouseLeft) {
+      } else if (!input.mouseLeft && !input.mobileAttackHeld) {
         world.miningProgress = 0;
         world.miningX = -1;
         world.miningY = -1;
