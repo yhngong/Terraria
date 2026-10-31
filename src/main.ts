@@ -67,6 +67,7 @@ class TerrariaGame {
     this.enemies.allowNaturalSpawns = mode === 'survival';
     this.bosses = new BossManager();
     this.hud = new HUD();
+    this.hud.isArenaMode = mode === 'arena';
 
     this.camX = this.player.x - this.canvas.width / (2 * this.zoom);
     this.camY = this.player.y - this.canvas.height / (2 * this.zoom);
@@ -87,6 +88,7 @@ class TerrariaGame {
   private saveGame(): void {
     try {
       const payload = {
+        isArena: this.hud.isArenaMode,
         tiles: Array.from(this.world.tiles),
         walls: Array.from(this.world.walls),
         surfaceY: Array.from(this.world.surfaceY),
@@ -125,7 +127,7 @@ class TerrariaGame {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      this.initNewWorld(1337, 'arena');
+      this.initNewWorld(1337, data.isArena === false ? 'survival' : 'arena');
       this.world.tiles.set(data.tiles);
       this.world.walls.set(data.walls);
       this.world.surfaceY.set(data.surfaceY);

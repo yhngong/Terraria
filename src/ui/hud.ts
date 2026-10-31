@@ -17,6 +17,7 @@ export interface ChatLine {
 }
 
 export class HUD {
+  isArenaMode = true;
   inventoryOpen = false;
   bossMenuOpen = false;
   fullMapOpen = false;
@@ -144,35 +145,37 @@ export class HUD {
         audio.play('craft');
         return true;
       }
-      if (pointInRect(mx, my, btnStartRush)) {
-        bosses.startBossRush(player, audio, (m, c) => this.addChat(m, c));
-        return true;
-      }
-      if (pointInRect(mx, my, btnNextWave)) {
-        bosses.advanceBossRushNow(player, audio, (m, c) => this.addChat(m, c));
-        return true;
-      }
-      if (pointInRect(mx, my, btnToggleMount)) {
-        player.mounted = !player.mounted;
-        audio.play('grapple');
-        this.addChat(
-          player.mounted ? `Mounted ${player.getMountName()}!` : 'Dismounted.',
-          '#3be8d1'
-        );
-        return true;
-      }
-      if (pointInRect(mx, my, btnCycleMount)) {
-        const order: ('ufo' | 'fishron' | 'dragon' | 'airship')[] = [
-          'ufo',
-          'fishron',
-          'dragon',
-          'airship'
-        ];
-        player.mountType = order[(order.indexOf(player.mountType) + 1) % order.length];
-        player.mounted = true;
-        audio.play('magic');
-        this.addChat(`Switched Flying Mount to: ${player.getMountName()}!`, '#ffd747');
-        return true;
+      if (this.isArenaMode) {
+        if (pointInRect(mx, my, btnStartRush)) {
+          bosses.startBossRush(player, audio, (m, c) => this.addChat(m, c));
+          return true;
+        }
+        if (pointInRect(mx, my, btnNextWave)) {
+          bosses.advanceBossRushNow(player, audio, (m, c) => this.addChat(m, c));
+          return true;
+        }
+        if (pointInRect(mx, my, btnToggleMount)) {
+          player.mounted = !player.mounted;
+          audio.play('grapple');
+          this.addChat(
+            player.mounted ? `Mounted ${player.getMountName()}!` : 'Dismounted.',
+            '#3be8d1'
+          );
+          return true;
+        }
+        if (pointInRect(mx, my, btnCycleMount)) {
+          const order: ('ufo' | 'fishron' | 'dragon' | 'airship')[] = [
+            'ufo',
+            'fishron',
+            'dragon',
+            'airship'
+          ];
+          player.mountType = order[(order.indexOf(player.mountType) + 1) % order.length];
+          player.mounted = true;
+          audio.play('magic');
+          this.addChat(`Switched Flying Mount to: ${player.getMountName()}!`, '#ffd747');
+          return true;
+        }
       }
     }
 
@@ -812,84 +815,86 @@ export class HUD {
     ctx.fillStyle = '#fff';
     ctx.fillText('Save World', sw - 98, 174);
 
-    // 3b. Top-Center Boss Rush & Flying Mount Status Bar
-    const cx = Math.floor(sw / 2);
-    ctx.fillStyle = 'rgba(12, 16, 30, 0.88)';
-    ctx.fillRect(cx - 226, 12, 452, 58);
-    ctx.strokeStyle = bosses.bossRushActive ? '#ffd747' : '#4a628a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cx - 226, 12, 452, 58);
+    // 3b. Top-Center Boss Rush & Flying Mount Status Bar (Arena Mode Only!)
+    if (this.isArenaMode) {
+      const cx = Math.floor(sw / 2);
+      ctx.fillStyle = 'rgba(12, 16, 30, 0.88)';
+      ctx.fillRect(cx - 226, 12, 452, 58);
+      ctx.strokeStyle = bosses.bossRushActive ? '#ffd747' : '#4a628a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(cx - 226, 12, 452, 58);
 
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 13px monospace';
-    const mins = Math.floor(bosses.bossRushTimer / 60);
-    const secs = (bosses.bossRushTimer % 60).toFixed(1).padStart(4, '0');
-    if (bosses.bossRushCompleted) {
-      ctx.fillStyle = '#05c8ff';
-      ctx.fillText(`🏆 14-BOSS RUSH COMPLETED! CLEAR TIME: ${mins}:${secs}`, cx, 31);
-    } else if (bosses.bossRushActive) {
-      const waveEntry = BOSS_CATALOG[bosses.bossRushWave - 1];
-      const waveStatus =
-        bosses.bossRushCountdown > 0
-          ? `Next Wave in ${bosses.bossRushCountdown.toFixed(1)}s...`
-          : waveEntry?.name || '';
-      ctx.fillStyle = '#ffd747';
-      ctx.fillText(
-        `⚔ BOSS RUSH WAVE ${bosses.bossRushWave}/14: ${waveStatus} (${mins}:${secs})`,
-        cx,
-        31
-      );
-    } else {
-      ctx.fillStyle = '#5ce1ff';
-      ctx.fillText(
-        `GRAND ARENA — Mount: ${player.mounted ? player.getMountName() : 'OFF'} (WASD to Fly, Shift to Boost)`,
-        cx,
-        31
-      );
-    }
-
-    // 4 interactive buttons in Top-Center Bar
-    const centerBtns = [
-      {
-        x: cx - 220,
-        w: 108,
-        label: bosses.bossRushActive ? 'Restart Rush' : '▶ Start Rush',
-        bg: '#59243a',
-        border: '#ff668c'
-      },
-      {
-        x: cx - 106,
-        w: 96,
-        label: '⏭ Next Wave',
-        bg: '#4a361f',
-        border: '#ffd747'
-      },
-      {
-        x: cx - 4,
-        w: 112,
-        label: `[R] Mount:${player.mounted ? 'ON' : 'OFF'}`,
-        bg: player.mounted ? '#1f4f46' : '#2d3442',
-        border: '#3be8d1'
-      },
-      {
-        x: cx + 114,
-        w: 106,
-        label: '[F] Next Mount',
-        bg: '#2b3859',
-        border: '#75b8ff'
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 13px monospace';
+      const mins = Math.floor(bosses.bossRushTimer / 60);
+      const secs = (bosses.bossRushTimer % 60).toFixed(1).padStart(4, '0');
+      if (bosses.bossRushCompleted) {
+        ctx.fillStyle = '#05c8ff';
+        ctx.fillText(`🏆 14-BOSS RUSH COMPLETED! CLEAR TIME: ${mins}:${secs}`, cx, 31);
+      } else if (bosses.bossRushActive) {
+        const waveEntry = BOSS_CATALOG[bosses.bossRushWave - 1];
+        const waveStatus =
+          bosses.bossRushCountdown > 0
+            ? `Next Wave in ${bosses.bossRushCountdown.toFixed(1)}s...`
+            : waveEntry?.name || '';
+        ctx.fillStyle = '#ffd747';
+        ctx.fillText(
+          `⚔ BOSS RUSH WAVE ${bosses.bossRushWave}/14: ${waveStatus} (${mins}:${secs})`,
+          cx,
+          31
+        );
+      } else {
+        ctx.fillStyle = '#5ce1ff';
+        ctx.fillText(
+          `GRAND ARENA — Mount: ${player.mounted ? player.getMountName() : 'OFF'} (WASD to Fly, Shift to Boost)`,
+          cx,
+          31
+        );
       }
-    ];
-    ctx.font = 'bold 11px monospace';
-    for (const b of centerBtns) {
-      ctx.fillStyle = b.bg;
-      ctx.fillRect(b.x, 42, b.w, 24);
-      ctx.strokeStyle = b.border;
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(b.x, 42, b.w, 24);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(b.label, b.x + b.w / 2, 58);
+
+      // 4 interactive buttons in Top-Center Bar
+      const centerBtns = [
+        {
+          x: cx - 220,
+          w: 108,
+          label: bosses.bossRushActive ? 'Restart Rush' : '▶ Start Rush',
+          bg: '#59243a',
+          border: '#ff668c'
+        },
+        {
+          x: cx - 106,
+          w: 96,
+          label: '⏭ Next Wave',
+          bg: '#4a361f',
+          border: '#ffd747'
+        },
+        {
+          x: cx - 4,
+          w: 112,
+          label: `[R] Mount:${player.mounted ? 'ON' : 'OFF'}`,
+          bg: player.mounted ? '#1f4f46' : '#2d3442',
+          border: '#3be8d1'
+        },
+        {
+          x: cx + 114,
+          w: 106,
+          label: '[F] Next Mount',
+          bg: '#2b3859',
+          border: '#75b8ff'
+        }
+      ];
+      ctx.font = 'bold 11px monospace';
+      for (const b of centerBtns) {
+        ctx.fillStyle = b.bg;
+        ctx.fillRect(b.x, 42, b.w, 24);
+        ctx.strokeStyle = b.border;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(b.x, 42, b.w, 24);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(b.label, b.x + b.w / 2, 58);
+      }
+      ctx.textAlign = 'left';
     }
-    ctx.textAlign = 'left';
 
     // 4. Active Boss Health Bar at Bottom Center
     const bossHp = bosses.getBossHealthSummary();
@@ -939,7 +944,9 @@ export class HUD {
       ctx.font = '11px monospace';
       ctx.fillStyle = 'rgba(200, 220, 255, 0.88)';
       ctx.fillText(
-        'Controls: [WASD/Space] 360° Mount Flight  [Shift] Mount Turbo Boost  [R] Toggle Mount  [F] Switch Mount (UFO/Fishron/Dragon/Ship)  [L-Click] Attack  [H] Heal  [K] 14 Bosses & Gear',
+        this.isArenaMode
+          ? 'Controls: [WASD/Space] 360° Mount Flight  [Shift] Mount Turbo Boost  [R] Toggle Mount  [F] Switch Mount (UFO/Fishron/Dragon/Ship)  [L-Click] Attack  [H] Heal  [K] 14 Bosses & Gear'
+          : 'Controls: [WASD/Space] Move & Jump  [I] Inventory & Crafting  [L-Click] Mine / Place / Attack  [R-Click] Open Chest / Door  [E] Grapple  [H] Quick Heal  [M] World Map',
         16,
         sh - 10
       );
