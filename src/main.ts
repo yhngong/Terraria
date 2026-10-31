@@ -461,6 +461,14 @@ class TerrariaGame {
       }
     }
 
+    // Keep active yoyo projectiles tracking the cursor every frame
+    for (const p of this.projectiles.projectiles) {
+      if (p.friendly && p.type.startsWith('yoyo_')) {
+        p.targetX = this.input.worldMouseX;
+        p.targetY = this.input.worldMouseY;
+      }
+    }
+
     this.projectiles.update(dt, this.world, this.particles, homingTargets, this.player);
     this.enemies.update(
       dt,
@@ -590,7 +598,7 @@ class TerrariaGame {
     this.enemies.render(this.ctx, renderCamX, renderCamY);
     this.bosses.render(this.ctx, renderCamX, renderCamY, this.player);
     this.player.render(this.ctx, renderCamX, renderCamY, this.atlas);
-    this.projectiles.render(this.ctx, renderCamX, renderCamY);
+    this.projectiles.render(this.ctx, renderCamX, renderCamY, this.player);
     this.particles.render(this.ctx, renderCamX, renderCamY);
 
     // Tile selection cursor highlight when holding a tool or block

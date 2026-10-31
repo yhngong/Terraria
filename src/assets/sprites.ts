@@ -296,6 +296,34 @@ export class SpriteAtlas {
         }
         break;
       }
+      case 'scythe': {
+        // Diagonal reaper handle + sweeping curved scythe blade
+        ctx.fillStyle = '#5c3c6e';
+        for (let i = 0; i < 14; i++) {
+          ctx.fillRect(4 + i, 19 - i, 2, 2);
+        }
+        ctx.fillStyle = color;
+        ctx.fillRect(10, 3, 10, 4);
+        ctx.fillRect(6, 5, 6, 3);
+        ctx.fillRect(4, 7, 4, 3);
+        ctx.fillStyle = accent;
+        ctx.fillRect(11, 4, 8, 2);
+        ctx.fillRect(7, 6, 4, 1);
+        break;
+      }
+      case 'yoyo': {
+        // Coiled string + glowing dual-ring yoyo disc
+        ctx.fillStyle = '#dce8ff';
+        ctx.fillRect(4, 15, 5, 2);
+        ctx.fillRect(7, 13, 3, 2);
+        ctx.fillStyle = color;
+        ctx.fillRect(9, 5, 11, 11);
+        ctx.fillStyle = accent;
+        ctx.fillRect(11, 7, 7, 7);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(13, 9, 3, 3);
+        break;
+      }
       case 'pickaxe': {
         ctx.fillStyle = '#825432';
         for (let i = 0; i < 12; i++) {

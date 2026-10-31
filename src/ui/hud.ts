@@ -454,12 +454,15 @@ export class HUD {
             {
               label: 'Calamity Gear',
               action: () => {
+                player.addItem('earth', 1);
+                player.addItem('deaths_ascension', 1);
+                player.addItem('galactus_blade', 1);
+                player.addItem('holy_collider', 1);
+                player.addItem('azathoth', 1);
+                player.addItem('the_obliterator', 1);
+                player.addItem('burning_revelation', 1);
                 player.addItem('ark_of_the_cosmos', 1);
                 player.addItem('dragon_rage', 1);
-                player.addItem('excelsus', 1);
-                player.addItem('phoenix_flame_blaster', 1);
-                player.addItem('soma_prime', 1);
-                player.addItem('vehemence', 1);
                 player.addItem('crystyl_crusher', 1);
                 player.addItem('omega_healing_potion', 30);
                 player.armor.head = { id: 'demonshade_helmet', count: 1 };
@@ -472,7 +475,7 @@ export class HUD {
                 player.hp = 700;
                 player.maxMana = 200;
                 player.mana = 200;
-                this.addChat("Equipped Supreme Calamity Loadout (Ark of the Cosmos, Dragon's Rage, Crystyl Crusher & Demonshade Armor)!", '#ff1938');
+                this.addChat("Equipped Calamity Arsenal (Earth, Death's Ascension, Galactus Blade, Holy Collider, Azathoth Yoyo & Demonshade Armor)!", '#ff1938');
               }
             },
             {

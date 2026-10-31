@@ -17,6 +17,8 @@ export type ItemCategory =
 
 export type IconType =
   | 'sword'
+  | 'scythe'
+  | 'yoyo'
   | 'pickaxe'
   | 'axe'
   | 'hammer'
@@ -808,6 +810,208 @@ reg({
   spread: 0.18,
   value: 5000000,
   tooltip: '[Calamity Mod] The ultimate Auric/Shadowspec scissor-blade — Rends reality with homing cosmic constellations!'
+});
+reg({
+  id: 'holy_collider',
+  name: 'Holy Collider [Calamity]',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 12,
+  color: '#ffd747',
+  accentColor: '#ff771c',
+  damage: 155,
+  knockback: 8.5,
+  useTime: 0.15,
+  autoReuse: true,
+  range: 80,
+  projectileType: 'holy_collider_flame',
+  projectileSpeed: 880,
+  projectileCount: 4,
+  spread: 0.35,
+  value: 1200000,
+  tooltip: '[Calamity Mod] Sacred Profaned crucible greatsword — Unleashes an eruption of holy profaned fire!'
+});
+reg({
+  id: 'galactus_blade',
+  name: 'Galactus Blade [Calamity]',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 13,
+  color: '#ff47b8',
+  accentColor: '#3be8d1',
+  damage: 165,
+  knockback: 8,
+  useTime: 0.13,
+  autoReuse: true,
+  range: 74,
+  projectileType: 'galactus_comet',
+  projectileSpeed: 1020,
+  projectileCount: 4,
+  spread: 0.22,
+  value: 1600000,
+  tooltip: '[Calamity Mod] Forged from the fury of a thousand galaxies — Rains cosmic Galactus Comets from the sky!'
+});
+reg({
+  id: 'deaths_ascension',
+  name: "Death's Ascension [Calamity]",
+  category: 'melee',
+  iconType: 'scythe',
+  maxStack: 1,
+  rarity: 13,
+  color: '#a638ff',
+  accentColor: '#ff29c6',
+  damage: 175,
+  knockback: 8.5,
+  useTime: 0.15,
+  autoReuse: true,
+  range: 82,
+  projectileType: 'death_scythe',
+  projectileSpeed: 860,
+  projectileCount: 3,
+  spread: 0.26,
+  value: 1750000,
+  tooltip: "[Calamity Mod] Reaper's Cosmilite greatscythe — Launches homing Death Scythes that slice through bosses!"
+});
+reg({
+  id: 'earth',
+  name: 'Earth [Calamity]',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 15,
+  color: '#2bff6e',
+  accentColor: '#ff771c',
+  damage: 245,
+  knockback: 10,
+  useTime: 0.13,
+  autoReuse: true,
+  range: 88,
+  projectileType: 'earth_meteor',
+  projectileSpeed: 1050,
+  projectileCount: 5,
+  spread: 0.28,
+  value: 5500000,
+  tooltip: '[Calamity Mod] Planetary Shadowspec greatsword — Rains a cataclysm of blazing, frost & emerald meteors from the heavens!'
+});
+
+// =========================================================
+// 2B. YOYOS (Vanilla & Calamity Mod Tethered Yoyos!)
+// =========================================================
+reg({
+  id: 'air_spinner',
+  name: 'Air Spinner [Calamity Yoyo]',
+  category: 'melee',
+  iconType: 'yoyo',
+  maxStack: 1,
+  rarity: 3,
+  color: '#3be8d1',
+  accentColor: '#ffd747',
+  damage: 42,
+  knockback: 4,
+  useTime: 0.22,
+  autoReuse: true,
+  range: 260,
+  projectileType: 'yoyo_air',
+  projectileSpeed: 760,
+  value: 15000,
+  tooltip: '[Calamity Yoyo] Tracks your cursor on a string and fires aerial feather blades!'
+});
+reg({
+  id: 'pandemic',
+  name: 'Pandemic [Calamity Yoyo]',
+  category: 'melee',
+  iconType: 'yoyo',
+  maxStack: 1,
+  rarity: 8,
+  color: '#59e62e',
+  accentColor: '#ff4252',
+  damage: 86,
+  knockback: 5,
+  useTime: 0.18,
+  autoReuse: true,
+  range: 340,
+  projectileType: 'yoyo_pandemic',
+  projectileSpeed: 880,
+  value: 180000,
+  tooltip: '[Calamity Yoyo] Plague-infused yoyo that unleashes homing plague seekers around your cursor!'
+});
+reg({
+  id: 'terrarian_yoyo',
+  name: 'Terrarian [Yoyo]',
+  category: 'melee',
+  iconType: 'yoyo',
+  maxStack: 1,
+  rarity: 10,
+  color: '#2be6b8',
+  accentColor: '#96ff0a',
+  damage: 120,
+  knockback: 6.5,
+  useTime: 0.16,
+  autoReuse: true,
+  range: 380,
+  projectileType: 'yoyo_terrarian',
+  projectileSpeed: 960,
+  value: 1000000,
+  tooltip: 'Dropped by the Moon Lord — Legendary yoyo that fires homing planetary orbs!'
+});
+reg({
+  id: 'burning_revelation',
+  name: 'Burning Revelation [Calamity Yoyo]',
+  category: 'melee',
+  iconType: 'yoyo',
+  maxStack: 1,
+  rarity: 12,
+  color: '#ffd747',
+  accentColor: '#2bff6e',
+  damage: 148,
+  knockback: 7,
+  useTime: 0.15,
+  autoReuse: true,
+  range: 420,
+  projectileType: 'yoyo_revelation',
+  projectileSpeed: 1040,
+  value: 1400000,
+  tooltip: '[Calamity Yoyo] Blessed by Providence — Orbits your cursor in a vortex of profaned holy fire!'
+});
+reg({
+  id: 'the_obliterator',
+  name: 'The Obliterator [Calamity Yoyo]',
+  category: 'melee',
+  iconType: 'yoyo',
+  maxStack: 1,
+  rarity: 13,
+  color: '#ff29c6',
+  accentColor: '#3be8d1',
+  damage: 178,
+  knockback: 8,
+  useTime: 0.14,
+  autoReuse: true,
+  range: 460,
+  projectileType: 'yoyo_obliterator',
+  projectileSpeed: 1120,
+  value: 1900000,
+  tooltip: '[Calamity Yoyo] Dropped by The Devourer of Gods — Shreds targets with Cosmilite nebula lasers!'
+});
+reg({
+  id: 'azathoth',
+  name: 'Azathoth [Calamity Yoyo]',
+  category: 'melee',
+  iconType: 'yoyo',
+  maxStack: 1,
+  rarity: 15,
+  color: '#ff1938',
+  accentColor: '#ffaa00',
+  damage: 235,
+  knockback: 9.5,
+  useTime: 0.12,
+  autoReuse: true,
+  range: 520,
+  projectileType: 'yoyo_azathoth',
+  projectileSpeed: 1250,
+  value: 5200000,
+  tooltip: '[Calamity Yoyo] Supreme Shadowspec yoyo — Unleashes a relentless 360° storm of cosmic lasers and orbs!'
 });
 
 // =========================================================

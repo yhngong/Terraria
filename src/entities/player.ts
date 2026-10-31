@@ -214,32 +214,38 @@ export class Player {
     }
     if (wave === 15) {
       // Entering Calamity Post-Moon Lord (Providence & Devourer of Gods)
-      this.inventory[0] = { id: 'excelsus', count: 1 };
-      this.inventory[1] = { id: 'zenith', count: 1 };
-      this.inventory[2] = { id: 'last_prism', count: 1 };
-      this.inventory[3] = { id: 'blossom_pickaxe', count: 1 };
+      this.inventory[0] = { id: 'holy_collider', count: 1 };
+      this.inventory[1] = { id: 'galactus_blade', count: 1 };
+      this.inventory[2] = { id: 'deaths_ascension', count: 1 };
+      this.inventory[3] = { id: 'burning_revelation', count: 1 };
       this.inventory[4] = { id: 'omega_healing_potion', count: 30 };
+      this.inventory[5] = { id: 'excelsus', count: 1 };
+      this.inventory[6] = { id: 'the_obliterator', count: 1 };
+      this.inventory[7] = { id: 'blossom_pickaxe', count: 1 };
       this.armor.head = { id: 'tarragon_helmet', count: 1 };
       this.armor.chest = { id: 'tarragon_breastplate', count: 1 };
       this.armor.legs = { id: 'tarragon_leggings', count: 1 };
       this.maxHp = 600;
       this.hp = 600;
-      return 'Calamity Tier I Unlocked: Excelsus, The Zenith, Blossom Pickaxe & Tarragon Armor!';
+      return "Calamity Tier I Unlocked: Holy Collider, Galactus Blade, Death's Ascension, Burning Revelation & Tarragon Armor!";
     }
     if (wave === 17) {
       // Entering Yharon & Supreme Witch, Calamitas
-      this.inventory[0] = { id: 'dragon_rage', count: 1 };
-      this.inventory[1] = { id: 'phoenix_flame_blaster', count: 1 };
-      this.inventory[2] = { id: 'vehemence', count: 1 };
-      this.inventory[3] = { id: 'crystyl_crusher', count: 1 };
+      this.inventory[0] = { id: 'earth', count: 1 };
+      this.inventory[1] = { id: 'ark_of_the_cosmos', count: 1 };
+      this.inventory[2] = { id: 'azathoth', count: 1 };
+      this.inventory[3] = { id: 'dragon_rage', count: 1 };
       this.inventory[4] = { id: 'omega_healing_potion', count: 40 };
+      this.inventory[5] = { id: 'phoenix_flame_blaster', count: 1 };
+      this.inventory[6] = { id: 'vehemence', count: 1 };
+      this.inventory[7] = { id: 'crystyl_crusher', count: 1 };
       this.armor.head = { id: 'auric_tesla_helmet', count: 1 };
       this.armor.chest = { id: 'auric_tesla_breastplate', count: 1 };
       this.armor.legs = { id: 'auric_tesla_leggings', count: 1 };
       this.accessories[1] = { id: 'celestial_tracers', count: 1 };
       this.maxHp = 700;
       this.hp = 700;
-      return "Calamity Auric Tier Unlocked: Dragon's Rage, Drataliornus, Vehemence, Crystyl Crusher & Auric Tesla Armor!";
+      return "Calamity Auric Tier Unlocked: Earth, Ark of the Cosmos, Azathoth Yoyo, Dragon's Rage & Auric Tesla Armor!";
     }
     return null;
   }
@@ -1113,17 +1119,85 @@ export class Player {
               targetY: input.worldMouseY + (Math.random() - 0.5) * 36
             });
           }
-        } else {
+        } else if (held.projectileType.startsWith('yoyo_')) {
+          // Tethered Yoyo: refresh existing yoyo or deploy a new one!
+          const existing = projectiles.projectiles.find(
+            (p) => p.friendly && p.type === held.projectileType
+          );
+          if (existing) {
+            existing.life = existing.maxLife;
+            existing.targetX = input.worldMouseX;
+            existing.targetY = input.worldMouseY;
+            existing.damage = dmg;
+          } else {
+            projectiles.spawn({
+              x: this.x + Math.cos(angle) * 18,
+              y: this.y + Math.sin(angle) * 18,
+              vx: Math.cos(angle) * spd,
+              vy: Math.sin(angle) * spd,
+              type: held.projectileType,
+              damage: dmg,
+              knockback: held.knockback || 5,
+              friendly: true,
+              targetX: input.worldMouseX,
+              targetY: input.worldMouseY,
+              arcOffset: held.range || 360
+            });
+          }
+        } else if (
+          held.projectileType === 'earth_meteor' ||
+          held.projectileType === 'galactus_comet'
+        ) {
+          // Rain cosmic comets / planetary meteors from the sky toward cursor + forward slash!
+          const count = held.projectileCount || 4;
+          for (let i = 0; i < count; i++) {
+            const skyX = input.worldMouseX + (Math.random() - 0.5) * 240;
+            const skyY = input.worldMouseY - 360 - Math.random() * 80;
+            const tx = input.worldMouseX + (Math.random() - 0.5) * 75;
+            const ty = input.worldMouseY + (Math.random() - 0.5) * 45;
+            const ma = Math.atan2(ty - skyY, tx - skyX);
+            projectiles.spawn({
+              x: skyX,
+              y: skyY,
+              vx: Math.cos(ma) * spd,
+              vy: Math.sin(ma) * spd,
+              type: held.projectileType,
+              damage: dmg,
+              knockback: held.knockback || 7,
+              friendly: true
+            });
+          }
+          // Plus a direct forward wave from the blade!
           projectiles.spawn({
-            x: this.x + Math.cos(angle) * 14,
-            y: this.y + Math.sin(angle) * 14,
-            vx: Math.cos(angle) * spd,
-            vy: Math.sin(angle) * spd,
+            x: this.x + Math.cos(angle) * 18,
+            y: this.y + Math.sin(angle) * 18,
+            vx: Math.cos(angle) * spd * 0.85,
+            vy: Math.sin(angle) * spd * 0.85,
             type: held.projectileType,
             damage: dmg,
-            knockback: held.knockback || 4,
+            knockback: held.knockback || 8,
             friendly: true
           });
+        } else {
+          const count = held.projectileCount || 1;
+          const spread = held.spread || 0;
+          for (let i = 0; i < count; i++) {
+            const offset =
+              count === 1
+                ? 0
+                : (i - (count - 1) / 2) * (spread / Math.max(1, count - 1));
+            const a = angle + offset;
+            projectiles.spawn({
+              x: this.x + Math.cos(a) * 14,
+              y: this.y + Math.sin(a) * 14,
+              vx: Math.cos(a) * spd,
+              vy: Math.sin(a) * spd,
+              type: held.projectileType,
+              damage: dmg,
+              knockback: held.knockback || 4,
+              friendly: true
+            });
+          }
         }
       }
       return;

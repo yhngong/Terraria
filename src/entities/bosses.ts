@@ -1402,6 +1402,7 @@ export class BossManager {
         break;
       case 'moon_lord':
         world.spawnDrop(dropX, dropY, 'zenith', 1);
+        world.spawnDrop(dropX, dropY, 'terrarian_yoyo', 1);
         world.spawnDrop(dropX, dropY, 'meowmere', 1);
         world.spawnDrop(dropX, dropY, 'sdmg', 1);
         world.spawnDrop(dropX, dropY, 'last_prism', 1);
@@ -1409,28 +1410,33 @@ export class BossManager {
         world.spawnDrop(dropX, dropY, 'solar_fragment', 45);
         world.spawnDrop(dropX, dropY, 'profaned_core', 1);
         world.spawnDrop(dropX, dropY, 'super_healing_potion', 25);
-        onChat('Victory! You have conquered the Moon Lord and unlocked THE ZENITH & Profaned Core!', '#05c8ff');
+        onChat('Victory! You have conquered the Moon Lord and unlocked THE ZENITH & Terrarian Yoyo!', '#05c8ff');
         break;
       case 'providence':
         world.spawnDrop(dropX, dropY, 'unholy_essence', 35);
+        world.spawnDrop(dropX, dropY, 'holy_collider', 1);
+        world.spawnDrop(dropX, dropY, 'burning_revelation', 1);
         world.spawnDrop(dropX, dropY, 'blossom_pickaxe', 1);
         world.spawnDrop(dropX, dropY, 'tarragon_helmet', 1);
         world.spawnDrop(dropX, dropY, 'tarragon_breastplate', 1);
         world.spawnDrop(dropX, dropY, 'tarragon_leggings', 1);
         world.spawnDrop(dropX, dropY, 'cosmic_worm', 1);
         world.spawnDrop(dropX, dropY, 'omega_healing_potion', 20);
-        onChat('Providence’s profaned flames subside... Tarragon Armor & Blossom Pickaxe dropped!', '#2bff6e');
+        onChat('Providence’s profaned flames subside... Holy Collider, Burning Revelation Yoyo & Tarragon Armor dropped!', '#2bff6e');
         break;
       case 'devourer_of_gods':
         world.spawnDrop(dropX, dropY, 'cosmilite_bar', 40);
         world.spawnDrop(dropX, dropY, 'excelsus', 1);
+        world.spawnDrop(dropX, dropY, 'deaths_ascension', 1);
+        world.spawnDrop(dropX, dropY, 'galactus_blade', 1);
+        world.spawnDrop(dropX, dropY, 'the_obliterator', 1);
         world.spawnDrop(dropX, dropY, 'genesis_pickaxe', 1);
         world.spawnDrop(dropX, dropY, 'god_slayer_helmet', 1);
         world.spawnDrop(dropX, dropY, 'god_slayer_breastplate', 1);
         world.spawnDrop(dropX, dropY, 'god_slayer_leggings', 1);
         world.spawnDrop(dropX, dropY, 'blessed_phoenix_egg', 1);
         world.spawnDrop(dropX, dropY, 'omega_healing_potion', 25);
-        onChat('The Devourer of Gods has been slain! Excelsus, Genesis Pickaxe & God Slayer Armor dropped!', '#ff29c6');
+        onChat("The Devourer of Gods slain! Death's Ascension, Galactus Blade, The Obliterator Yoyo & God Slayer Armor dropped!", '#ff29c6');
         break;
       case 'yharon':
         world.spawnDrop(dropX, dropY, 'auric_bar', 45);
@@ -1447,7 +1453,9 @@ export class BossManager {
         break;
       case 'supreme_calamitas':
         world.spawnDrop(dropX, dropY, 'shadowspec_bar', 50);
+        world.spawnDrop(dropX, dropY, 'earth', 1);
         world.spawnDrop(dropX, dropY, 'ark_of_the_cosmos', 1);
+        world.spawnDrop(dropX, dropY, 'azathoth', 1);
         world.spawnDrop(dropX, dropY, 'crystyl_crusher', 1);
         world.spawnDrop(dropX, dropY, 'soma_prime', 1);
         world.spawnDrop(dropX, dropY, 'vehemence', 1);
@@ -1455,7 +1463,7 @@ export class BossManager {
         world.spawnDrop(dropX, dropY, 'demonshade_breastplate', 1);
         world.spawnDrop(dropX, dropY, 'demonshade_leggings', 1);
         world.spawnDrop(dropX, dropY, 'omega_healing_potion', 40);
-        onChat('SUPREME VICTORY! Supreme Witch, Calamitas conquered! Ark of the Cosmos, Crystyl Crusher & Demonshade Armor unlocked!', '#ff1938');
+        onChat('SUPREME VICTORY! Supreme Witch, Calamitas conquered! Earth, Ark of the Cosmos, Azathoth Yoyo & Demonshade Armor unlocked!', '#ff1938');
         break;
     }
 

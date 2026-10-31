@@ -358,6 +358,78 @@ export class ProjectileManager {
         p.color = '#ffd747';
         p.accentColor = '#2bff6e';
         break;
+      case 'holy_collider_flame':
+        p.pierce = 10;
+        p.tileCollide = false;
+        p.radius = 16;
+        p.life = 1.1;
+        p.color = '#ffd747';
+        p.accentColor = '#ff771c';
+        break;
+      case 'galactus_comet':
+        p.pierce = 12;
+        p.tileCollide = false;
+        p.radius = 15;
+        p.life = 1.5;
+        p.color = '#ff47b8';
+        p.accentColor = '#3be8d1';
+        break;
+      case 'death_scythe':
+        p.pierce = 12;
+        p.homing = true;
+        p.tileCollide = false;
+        p.radius = 17;
+        p.life = 2.1;
+        p.color = '#a638ff';
+        p.accentColor = '#ff29c6';
+        break;
+      case 'earth_meteor': {
+        const earthPal = [
+          ['#ff551c', '#ffee55'], // Blazing Magma Meteor
+          ['#2bff6e', '#b8ffd0'], // Emerald Gaia Meteor
+          ['#3be8d1', '#ffd747']  // Frost/Starlight Meteor
+        ][Math.floor(Math.random() * 3)];
+        p.pierce = 14;
+        p.tileCollide = false;
+        p.radius = 17;
+        p.life = 1.6;
+        p.color = earthPal[0];
+        p.accentColor = earthPal[1];
+        break;
+      }
+      case 'yoyo_air':
+      case 'yoyo_pandemic':
+      case 'yoyo_terrarian':
+      case 'yoyo_revelation':
+      case 'yoyo_obliterator':
+      case 'yoyo_azathoth': {
+        p.pierce = 999;
+        p.tileCollide = false;
+        p.radius = 15;
+        p.life = 1.35;
+        p.maxLife = 1.35;
+        if (p.type === 'yoyo_air') {
+          p.color = '#3be8d1';
+          p.accentColor = '#ffd747';
+        } else if (p.type === 'yoyo_pandemic') {
+          p.color = '#59e62e';
+          p.accentColor = '#ff4252';
+        } else if (p.type === 'yoyo_terrarian') {
+          p.color = '#2be6b8';
+          p.accentColor = '#96ff0a';
+        } else if (p.type === 'yoyo_revelation') {
+          p.color = '#ffd747';
+          p.accentColor = '#2bff6e';
+        } else if (p.type === 'yoyo_obliterator') {
+          p.color = '#ff29c6';
+          p.accentColor = '#3be8d1';
+        } else {
+          p.color = '#ff1938';
+          p.accentColor = '#ffaa00';
+          p.radius = 18;
+        }
+        break;
+      }
     }
 
     this.projectiles.push(p);
@@ -407,6 +479,70 @@ export class ProjectileManager {
         p.y = ny;
         if (Math.random() < 0.7) {
           particles.spawn(p.x, p.y, p.color, 1, 50, 3, 0, true);
+        }
+        continue;
+      }
+
+      // Special Tethered Yoyo behavior: tracks cursor, tethered to player, multi-hits & spawns sub-orbs!
+      if (p.type.startsWith('yoyo_')) {
+        const tx = p.targetX ?? playerPos.x + 120;
+        const ty = p.targetY ?? playerPos.y;
+        const maxRange = p.arcOffset || 360;
+        let dx = tx - playerPos.x;
+        let dy = ty - playerPos.y;
+        const dFromPlayer = Math.hypot(dx, dy);
+        if (dFromPlayer > maxRange) {
+          dx = (dx / dFromPlayer) * maxRange;
+          dy = (dy / dFromPlayer) * maxRange;
+        }
+        const goalX = playerPos.x + dx;
+        const goalY = playerPos.y + dy;
+
+        // Smooth high-speed yoyo tracking with small orbital buzz around target
+        const buzzAngle = p.life * 28;
+        const orbitR = 12;
+        const destX = goalX + Math.cos(buzzAngle) * orbitR;
+        const destY = goalY + Math.sin(buzzAngle) * orbitR;
+        p.vx = (destX - p.x) * 18;
+        p.vy = (destY - p.y) * 18;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        // Reset hitIds every 0.12s so spinning yoyo deals continuous multi-hit damage!
+        if (Math.floor((p.life + dt) / 0.12) !== Math.floor(p.life / 0.12)) {
+          p.hitIds.clear();
+        }
+
+        // Emit secondary Calamity / Terrarian yoyo sub-projectiles every 0.24s!
+        if (Math.floor((p.life + dt) / 0.24) !== Math.floor(p.life / 0.24)) {
+          const subAngle = Math.random() * Math.PI * 2;
+          const subType =
+            p.type === 'yoyo_air'
+              ? 'leaf_blade'
+              : p.type === 'yoyo_pandemic'
+              ? 'homing_bullet'
+              : p.type === 'yoyo_terrarian'
+              ? 'terra_beam'
+              : p.type === 'yoyo_revelation'
+              ? 'holy_collider_flame'
+              : p.type === 'yoyo_obliterator'
+              ? 'cosmic_blade'
+              : 'cosmos_ark';
+          this.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(subAngle) * 620,
+            vy: Math.sin(subAngle) * 620,
+            type: subType,
+            damage: Math.round(p.damage * 0.65),
+            knockback: 3,
+            friendly: true,
+            homing: true
+          });
+        }
+
+        if (Math.random() < 0.75) {
+          particles.spawn(p.x, p.y, p.color, 1, 55, 3, 0, true);
         }
         continue;
       }
@@ -485,7 +621,12 @@ export class ProjectileManager {
     }
   }
 
-  render(ctx: CanvasRenderingContext2D, camX: number, camY: number): void {
+  render(
+    ctx: CanvasRenderingContext2D,
+    camX: number,
+    camY: number,
+    playerPos?: { x: number; y: number }
+  ): void {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
@@ -493,6 +634,23 @@ export class ProjectileManager {
       const sx = p.x - camX;
       const sy = p.y - camY;
       const angle = Math.atan2(p.vy, p.vx);
+
+      // Draw glowing Yoyo String from Player to Yoyo disc!
+      if (p.type.startsWith('yoyo_') && playerPos) {
+        ctx.save();
+        ctx.strokeStyle = p.accentColor;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.78;
+        ctx.beginPath();
+        const px = playerPos.x - camX;
+        const py = playerPos.y - camY;
+        const midX = (px + sx) * 0.5;
+        const midY = (py + sy) * 0.5 + 10;
+        ctx.moveTo(px, py);
+        ctx.quadraticCurveTo(midX, midY, sx, sy);
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // 1. Draw glowing motion ribbon trail
       if (p.history.length > 1) {
@@ -553,7 +711,10 @@ export class ProjectileManager {
         p.type === 'terra_beam' ||
         p.type === 'holy_beam' ||
         p.type === 'cosmic_blade' ||
-        p.type === 'cosmos_ark'
+        p.type === 'cosmos_ark' ||
+        p.type === 'death_scythe' ||
+        p.type === 'holy_collider_flame' ||
+        p.type.startsWith('yoyo_')
       ) {
         ctx.rotate(p.life * 20);
         ctx.strokeStyle = p.color;
