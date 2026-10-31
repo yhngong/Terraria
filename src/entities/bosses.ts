@@ -1330,20 +1330,24 @@ export class BossManager {
         world.spawnDrop(dropX, dropY, 'healing_potion', 8);
         world.spawnDrop(dropX, dropY, 'hermes_boots', 1);
         world.spawnDrop(dropX, dropY, 'grappling_hook', 1);
+        world.spawnDrop(dropX, dropY, 'air_spinner', 1);
         break;
       case 'eye_of_cthulhu':
         world.spawnDrop(dropX, dropY, 'demonite_ore', 45);
         world.spawnDrop(dropX, dropY, 'demonite_bar', 12);
+        world.spawnDrop(dropX, dropY, 'reefshark_pickaxe', 1);
         world.spawnDrop(dropX, dropY, 'healing_potion', 10);
         world.spawnDrop(dropX, dropY, 'worm_food', 1);
         break;
       case 'eater_of_worlds':
         world.spawnDrop(dropX, dropY, 'demonite_bar', 18);
         world.spawnDrop(dropX, dropY, 'shadow_scale', 25);
+        world.spawnDrop(dropX, dropY, 'biome_blade', 1);
         world.spawnDrop(dropX, dropY, 'healing_potion', 12);
         break;
       case 'queen_bee':
         world.spawnDrop(dropX, dropY, 'bees_knees', 1);
+        world.spawnDrop(dropX, dropY, 'minishark', 1);
         world.spawnDrop(dropX, dropY, 'jungle_spores', 15);
         world.spawnDrop(dropX, dropY, 'stinger', 15);
         world.spawnDrop(dropX, dropY, 'healing_potion', 12);
@@ -1381,6 +1385,7 @@ export class BossManager {
         break;
       case 'plantera':
         world.spawnDrop(dropX, dropY, 'chlorophyte_bar', 25);
+        world.spawnDrop(dropX, dropY, 'pandemic', 1);
         world.spawnDrop(dropX, dropY, 'lihzahrd_power_cell', 2);
         world.spawnDrop(dropX, dropY, 'greater_healing_potion', 15);
         break;

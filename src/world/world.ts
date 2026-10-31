@@ -63,7 +63,7 @@ export class World {
 
   private liquidTick = 0;
 
-  constructor(width = 840, height = 320) {
+  constructor(width = 1600, height = 480) {
     this.width = width;
     this.height = height;
     const size = width * height;
@@ -163,8 +163,8 @@ export class World {
   }
 
   getBiomeAt(tx: number, ty: number): BiomeType {
-    if (ty > this.height - 52) return 'underworld';
-    if (ty < 42) return 'sky';
+    if (ty > this.height - 76) return 'underworld';
+    if (ty < 48) return 'sky';
 
     // Sample nearby blocks for Corruption, Hallow, Jungle, Dungeon, Snow, Desert
     let corrupt = 0;
@@ -442,10 +442,10 @@ export class World {
     messages.push('Chlorophyte and Plantera Bulbs are sprouting in the Underground Jungle!');
 
     // 1. Convert a surface/underground band into The Hallow
-    const hallowStart = Math.floor(this.width * 0.56);
-    const hallowEnd = Math.floor(this.width * 0.68);
+    const hallowStart = Math.floor(this.width * 0.54);
+    const hallowEnd = Math.floor(this.width * 0.66);
     for (let x = hallowStart; x < hallowEnd; x++) {
-      for (let y = 30; y < this.height - 60; y++) {
+      for (let y = 30; y < this.height - 65; y++) {
         const t = this.getTile(x, y);
         if (t === TileId.GRASS) this.setTile(x, y, TileId.HALLOWED_GRASS);
         else if (t === TileId.STONE) this.setTile(x, y, TileId.PEARLSTONE);
@@ -455,9 +455,14 @@ export class World {
     // 2. Spawn Hardmode Ores + Jungle Chlorophyte & Plantera Bulbs
     this.blessWithHardmodeOres();
 
-    for (let k = 0; k < 140; k++) {
-      const x = Math.floor(this.width * 0.68 + Math.random() * (this.width * 0.22));
-      const y = Math.floor(110 + Math.random() * (this.height - 170));
+    const jCenter = this.templeX > 0 ? this.templeX : Math.floor(this.width * 0.78);
+    for (let k = 0; k < 280; k++) {
+      const x = clamp(
+        Math.floor(jCenter + (Math.random() - 0.5) * (this.width * 0.28)),
+        40,
+        this.width - 40
+      );
+      const y = Math.floor(110 + Math.random() * (this.height - 175));
       if (this.getTile(x, y) === TileId.MUD) {
         this.spawnOreVein(x, y, TileId.CHLOROPHYTE_ORE, 6);
       }
@@ -479,13 +484,13 @@ export class World {
     const ore =
       tier === 0 ? TileId.COBALT_ORE : tier === 1 ? TileId.MYTHRIL_ORE : TileId.TITANIUM_ORE;
 
-    // Also seed all 3 on first trigger so player always has full progression access
-    for (let i = 0; i < 90; i++) {
-      const rx = Math.floor(20 + Math.random() * (this.width - 40));
-      const ry = Math.floor(115 + Math.random() * (this.height - 175));
+    // Seed all 3 across the larger underground cavern layer
+    for (let i = 0; i < 240; i++) {
+      const rx = Math.floor(30 + Math.random() * (this.width - 60));
+      const ry = Math.floor(125 + Math.random() * (this.height - 195));
       if (this.getTile(rx, ry) === TileId.STONE) {
         const chosen =
-          i < 35 ? TileId.COBALT_ORE : i < 65 ? TileId.MYTHRIL_ORE : TileId.TITANIUM_ORE;
+          i < 95 ? TileId.COBALT_ORE : i < 175 ? TileId.MYTHRIL_ORE : TileId.TITANIUM_ORE;
         this.spawnOreVein(rx, ry, chosen, 5 + Math.floor(Math.random() * 4));
       }
     }

@@ -48,7 +48,7 @@ class TerrariaGame {
     this.particles = new ParticleSystem();
     this.atlas = new SpriteAtlas();
 
-    this.initNewWorld(1337, 'arena');
+    this.initNewWorld(Math.floor(Math.random() * 999999), 'arena');
 
     requestAnimationFrame((t) => this.loop(t));
   }
@@ -59,7 +59,7 @@ class TerrariaGame {
   }
 
   private initNewWorld(seed: number, mode: 'arena' | 'survival' = 'arena'): void {
-    this.world = mode === 'arena' ? generateArenaWorld() : generateWorld(seed);
+    this.world = mode === 'arena' ? generateArenaWorld(seed) : generateWorld(seed);
     this.player = new Player(this.world.spawnX, this.world.spawnY, mode);
     this.player.mounted = mode === 'arena';
     this.projectiles = new ProjectileManager();
@@ -249,7 +249,7 @@ class TerrariaGame {
         color: '#6b1236',
         border: '#ff3875',
         action: () => {
-          this.initNewWorld(1337, 'arena');
+          this.initNewWorld(Math.floor(Math.random() * 999999), 'arena');
           this.state = 'playing';
           this.bosses.startBossRush(this.player, this.audio, (m, c) => this.hud.addChat(m, c));
         }
@@ -260,7 +260,7 @@ class TerrariaGame {
         color: '#3c1e6e',
         border: '#c77dff',
         action: () => {
-          this.initNewWorld(1337, 'arena');
+          this.initNewWorld(Math.floor(Math.random() * 999999), 'arena');
           this.hud.bossMenuOpen = true;
           this.state = 'playing';
           this.audio.play('craft');

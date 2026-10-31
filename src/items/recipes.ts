@@ -66,6 +66,13 @@ export const RECIPES: Recipe[] = [
   // IRON ANVIL
   // =========================================================
   { result: 'iron_anvil', count: 1, station: TileId.WORK_BENCH, ingredients: [{ id: 'iron_bar', count: 5 }] },
+  { result: 'copper_pickaxe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 10 }, { id: 'wood', count: 3 }] },
+  { result: 'copper_axe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 8 }, { id: 'wood', count: 3 }] },
+  { result: 'copper_shortsword', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 7 }] },
+  { result: 'bronze_broadsword', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 8 }, { id: 'iron_bar', count: 2 }] },
+  { result: 'bronze_pickaxe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 10 }, { id: 'iron_bar', count: 2 }] },
+  { result: 'bronze_axe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 8 }, { id: 'iron_bar', count: 2 }] },
+  { result: 'bronze_bow', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'copper_bar', count: 7 }, { id: 'iron_bar', count: 2 }] },
   { result: 'iron_pickaxe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'iron_bar', count: 10 }, { id: 'wood', count: 3 }] },
   { result: 'iron_broadsword', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'iron_bar', count: 8 }] },
   { result: 'iron_helmet', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'iron_bar', count: 15 }] },
@@ -86,6 +93,12 @@ export const RECIPES: Recipe[] = [
   { result: 'shadow_leggings', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'demonite_bar', count: 20 }, { id: 'shadow_scale', count: 15 }] },
 
   { result: 'blade_of_grass', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'jungle_spores', count: 12 }, { id: 'stinger', count: 12 }] },
+  { result: 'bees_knees', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'jungle_spores', count: 10 }, { id: 'stinger', count: 10 }] },
+  { result: 'muramasa', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'bone', count: 25 }, { id: 'gold_bar', count: 10 }] },
+  { result: 'minishark', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'iron_bar', count: 15 }, { id: 'gold_bar', count: 10 }, { id: 'demonite_bar', count: 5 }] },
+  { result: 'wand_of_sparking', count: 1, station: TileId.WORK_BENCH, ingredients: [{ id: 'wood', count: 12 }, { id: 'torch', count: 8 }, { id: 'fallen_star', count: 2 }] },
+  { result: 'water_bolt', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'bone', count: 15 }, { id: 'fallen_star', count: 5 }] },
+  { result: 'demon_scythe', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'hellstone_bar', count: 12 }, { id: 'fallen_star', count: 5 }] },
   { result: 'grappling_hook', count: 1, station: TileId.ANVIL, ingredients: [{ id: 'iron_bar', count: 10 }, { id: 'cobweb', count: 15 }] },
   { result: 'musket_ball', count: 50, station: TileId.ANVIL, ingredients: [{ id: 'iron_bar', count: 1 }] },
 
@@ -188,6 +201,11 @@ export const RECIPES: Recipe[] = [
   { result: 'chlorophyte_leggings', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'chlorophyte_bar', count: 18 }] },
 
   { result: 'terra_blade', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'nights_edge', count: 1 }, { id: 'excalibur', count: 1 }, { id: 'chlorophyte_bar', count: 12 }] },
+  { result: 'tsunami', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'chlorophyte_bar', count: 15 }, { id: 'soul_of_flight', count: 15 }] },
+  { result: 'razorblade_typhoon', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'chlorophyte_bar', count: 15 }, { id: 'soul_of_sight', count: 10 }, { id: 'fallen_star', count: 10 }] },
+  { result: 'picksaw', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'pickaxe_axe', count: 1 }, { id: 'chlorophyte_bar', count: 15 }, { id: 'lihzahrd_brick', count: 20 }] },
+  { result: 'celestial_shell', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'chlorophyte_bar', count: 12 }, { id: 'soul_of_might', count: 8 }, { id: 'soul_of_sight', count: 8 }] },
+  { result: 'cosmic_car_key', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'chlorophyte_bar', count: 15 }, { id: 'soul_of_flight', count: 20 }, { id: 'hallowed_bar', count: 10 }] },
   { result: 'ankh_shield', count: 1, station: TileId.MYTHRIL_ANVIL, ingredients: [{ id: 'cobalt_shield', count: 1 }, { id: 'obsidian_skull', count: 1 }, { id: 'soul_of_night', count: 10 }] },
 
   // =========================================================
@@ -196,6 +214,11 @@ export const RECIPES: Recipe[] = [
   { result: 'luminite_bar', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_ore', count: 4 }] },
   { result: 'solar_eruption', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'solar_fragment', count: 18 }] },
   { result: 'nebula_blaze', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'solar_fragment', count: 18 }] },
+  { result: 'meowmere', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 12 }, { id: 'solar_fragment', count: 12 }] },
+  { result: 'sdmg', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 12 }, { id: 'megashark', count: 1 }] },
+  { result: 'last_prism', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 12 }, { id: 'crystal_storm', count: 1 }] },
+  { result: 'terrarian_yoyo', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 12 }, { id: 'pandemic', count: 1 }] },
+  { result: 'zenith', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'terra_blade', count: 1 }, { id: 'meowmere', count: 1 }, { id: 'luminite_bar', count: 15 }] },
   { result: 'celestial_sigil', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'solar_fragment', count: 20 }] },
   { result: 'super_healing_potion', count: 4, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'greater_healing_potion', count: 4 }, { id: 'solar_fragment', count: 1 }] },
   { result: 'solar_helmet', count: 1, station: TileId.ANCIENT_MANIPULATOR, ingredients: [{ id: 'luminite_bar', count: 8 }, { id: 'solar_fragment', count: 10 }] },
