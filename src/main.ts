@@ -550,6 +550,7 @@ class TerrariaGame {
     this.audio.updateMusic(dt, track);
 
     // Enemy projectile hits against Player
+    const calamityBossActive = (this.bosses.activeBoss?.tier || 0) >= 15;
     for (let i = this.projectiles.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles.projectiles[i];
       if (p.friendly) continue;
@@ -560,12 +561,19 @@ class TerrariaGame {
         p.y + p.radius > pb.y &&
         p.y - p.radius < pb.y + pb.h
       ) {
+        const isCalamityProj =
+          calamityBossActive ||
+          p.type === 'profaned_spear' ||
+          p.type === 'cosmic_blade' ||
+          p.type === 'yharon_fireball' ||
+          p.type === 'brimstone_hellblast';
         this.player.takeDamage(
           p.damage,
           Math.sign(p.vx) || 1,
           this.audio,
           this.particles,
-          this.world
+          this.world,
+          isCalamityProj ? 0.85 : 0
         );
         this.projectiles.projectiles.splice(i, 1);
       }

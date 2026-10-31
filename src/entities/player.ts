@@ -463,15 +463,13 @@ export class Player {
     knockbackDir: number,
     audio: AudioManager,
     particles: ParticleSystem,
-    world: World
+    world: World,
+    armorPierce = 0
   ): void {
     if (this.dead || this.invulnTimer > 0 || this.godMode) return;
-    const def = this.getDefense();
-    // Calamity / Endgame attacks (rawDamage >= 100) have armor penetration and a 35% minimum damage floor
-    // so stacking endgame armor never reduces boss damage to 1
-    const effDef = rawDamage >= 100 ? def * 0.35 : def * 0.5;
-    const minDmg = rawDamage >= 100 ? Math.round(rawDamage * 0.35) : 1;
-    const dmg = Math.max(minDmg, Math.round(rawDamage - effDef));
+    const def = this.getDefense() * Math.max(0, 1 - armorPierce);
+    const minDmg = armorPierce > 0 ? Math.round(rawDamage * 0.65) : 1;
+    const dmg = Math.max(minDmg, Math.round(rawDamage - def * 0.5));
     this.hp -= dmg;
     this.invulnTimer = 0.55;
 

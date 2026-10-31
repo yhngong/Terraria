@@ -896,7 +896,7 @@ export class BossManager {
           hp: 58000,
           maxHp: 58000,
           defense: 36,
-          contactDamage: 140,
+          contactDamage: 82,
           role: 'body'
         });
         break;
@@ -920,7 +920,7 @@ export class BossManager {
             hp: sharedHp,
             maxHp: sharedHp,
             defense: i === 0 ? 28 : i === segCount - 1 ? 24 : 44,
-            contactDamage: i === 0 ? 190 : i === segCount - 1 ? 120 : 138,
+            contactDamage: i === 0 ? 98 : i === segCount - 1 ? 66 : 74,
             role: i === 0 ? 'head' : i === segCount - 1 ? 'tail' : 'body',
             parentIndex: i - 1
           });
@@ -943,7 +943,7 @@ export class BossManager {
           hp: 92000,
           maxHp: 92000,
           defense: 40,
-          contactDamage: 180,
+          contactDamage: 92,
           role: 'body'
         });
         break;
@@ -964,7 +964,7 @@ export class BossManager {
           hp: 110000,
           maxHp: 110000,
           defense: 44,
-          contactDamage: 195,
+          contactDamage: 96,
           role: 'body'
         });
         break;
@@ -1155,11 +1155,12 @@ export class BossManager {
         if (dist(player.x, player.y, closestX, closestY) < 22) {
           const rayDmg =
             b.type === 'supreme_calamitas'
-              ? 215
+              ? 105
               : b.type === 'providence'
-              ? 160
+              ? 92
               : 95;
-          player.takeDamage(rayDmg, Math.sign(dx) || 1, audio, particles, world);
+          const rayPierce = b.tier >= 15 ? 0.85 : 0;
+          player.takeDamage(rayDmg, Math.sign(dx) || 1, audio, particles, world, rayPierce);
         }
       }
     }
@@ -1220,12 +1221,14 @@ export class BossManager {
 
       // Boss Part Contact Damage to Player
       if (rectOverlap(partRect, player.getBounds())) {
+        const contactPierce = b.tier >= 15 ? 0.85 : 0;
         player.takeDamage(
           part.contactDamage,
           Math.sign(player.x - part.x) || 1,
           audio,
           particles,
-          world
+          world,
+          contactPierce
         );
       }
     }
@@ -2870,7 +2873,7 @@ export class BossManager {
           vx: Math.cos(baseA + off) * 540,
           vy: Math.sin(baseA + off) * 540,
           type: 'profaned_spear',
-          damage: 125,
+          damage: 72,
           friendly: false
         });
       }
@@ -2888,7 +2891,7 @@ export class BossManager {
           vx: Math.cos(ang) * 420,
           vy: Math.sin(ang) * 420,
           type: k % 2 === 0 ? 'profaned_spear' : 'golem_fireball',
-          damage: 120,
+          damage: 68,
           friendly: false
         });
       }
@@ -2975,7 +2978,7 @@ export class BossManager {
             vx: Math.cos(la + off) * 520,
             vy: Math.sin(la + off) * 520,
             type: 'cosmic_blade',
-            damage: 142,
+            damage: 76,
             friendly: false
           });
         }
@@ -2994,7 +2997,7 @@ export class BossManager {
           vx: 560,
           vy: 0,
           type: 'phantasmal_bolt',
-          damage: 138,
+          damage: 74,
           friendly: false
         });
         // Vertical laser line
@@ -3004,7 +3007,7 @@ export class BossManager {
           vx: 0,
           vy: 560,
           type: 'death_laser',
-          damage: 138,
+          damage: 74,
           friendly: false
         });
       }
@@ -3071,7 +3074,7 @@ export class BossManager {
             vx: Math.cos(ang) * 480,
             vy: Math.sin(ang) * 480,
             type: 'yharon_fireball',
-            damage: 158,
+            damage: 82,
             friendly: false
           });
         }
@@ -3089,7 +3092,7 @@ export class BossManager {
           vx: Math.cos(baseA + off) * 580,
           vy: Math.sin(baseA + off) * 580,
           type: 'yharon_fireball',
-          damage: 152,
+          damage: 78,
           friendly: false
         });
       }
@@ -3140,7 +3143,7 @@ export class BossManager {
           vx: Math.cos(baseA + off) * 580,
           vy: Math.sin(baseA + off) * 580,
           type: 'brimstone_hellblast',
-          damage: 175,
+          damage: 86,
           friendly: false
         });
       }
@@ -3157,7 +3160,7 @@ export class BossManager {
           vx: 0,
           vy: 480,
           type: 'brimstone_hellblast',
-          damage: 168,
+          damage: 82,
           friendly: false
         });
       }
