@@ -8,7 +8,6 @@ import { generateWorld, generateArenaWorld } from './world/worldgen';
 import { Player } from './entities/player';
 import { ProjectileManager } from './entities/projectiles';
 import { EnemyManager } from './entities/enemies';
-import { NPCManager } from './entities/npcs';
 import { BossManager } from './entities/bosses';
 import { HUD } from './ui/hud';
 import { ITEMS } from './items/items';
@@ -28,12 +27,11 @@ class TerrariaGame {
   private player!: Player;
   private projectiles!: ProjectileManager;
   private enemies!: EnemyManager;
-  private npcs!: NPCManager;
   private bosses!: BossManager;
   private hud!: HUD;
 
   private state: 'menu' | 'playing' = 'menu';
-  private zoom = 1.75;
+  private zoom = 1.45;
   private camX = 0;
   private camY = 0;
   private lastTime = performance.now();
@@ -66,8 +64,7 @@ class TerrariaGame {
     this.player.mounted = true;
     this.projectiles = new ProjectileManager();
     this.enemies = new EnemyManager();
-    this.npcs = new NPCManager();
-    this.npcs.initNPCs(this.world);
+    this.enemies.allowNaturalSpawns = mode === 'survival';
     this.bosses = new BossManager();
     this.hud = new HUD();
 
@@ -75,7 +72,7 @@ class TerrariaGame {
     this.camY = this.player.y - this.canvas.height / (2 * this.zoom);
 
     this.hud.addChat(
-      'Flying Mount Active! Use [WASD/Space] to fly 360°, [Shift] to Turbo Boost, [R] to toggle mount, [F] to switch mount!',
+      'ZENITH & FLYING MOUNT ACTIVE! [WASD] 360° Flight, [Shift] Sonic Turbo Dash, [F] Switch Mount, [Click] Unleash Zenith!',
       '#3be8d1'
     );
   }
@@ -121,7 +118,7 @@ class TerrariaGame {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      this.initNewWorld(1337);
+      this.initNewWorld(1337, 'arena');
       this.world.tiles.set(data.tiles);
       this.world.walls.set(data.walls);
       this.world.surfaceY.set(data.surfaceY);
@@ -174,45 +171,73 @@ class TerrariaGame {
     this.world.timeOfDay = (this.world.timeOfDay + dt * 15) % 1440;
     const sw = this.canvas.width;
     const sh = this.canvas.height;
+    const t = performance.now() * 0.001;
 
     const viewW = sw / this.zoom;
     const viewH = sh / this.zoom;
-    this.camX = this.world.spawnX - viewW / 2 + Math.sin(performance.now() * 0.0003) * 140;
-    this.camY = this.world.spawnY - viewH / 2 - 20;
+    this.camX = this.world.spawnX - viewW / 2 + Math.sin(t * 0.35) * 160;
+    this.camY = this.world.spawnY - viewH / 2 - 30;
 
     this.ctx.save();
     this.ctx.scale(this.zoom, this.zoom);
     this.world.render(this.ctx, this.camX, this.camY, sw, sh, this.zoom, this.atlas, 'forest');
     this.ctx.restore();
 
-    // Darken backdrop slightly
-    this.ctx.fillStyle = 'rgba(8, 12, 24, 0.55)';
+    // Cinematic dark gradient backdrop
+    const grad = this.ctx.createRadialGradient(sw / 2, sh / 2, 80, sw / 2, sh / 2, Math.max(sw, sh) * 0.7);
+    grad.addColorStop(0, 'rgba(10, 14, 30, 0.5)');
+    grad.addColorStop(1, 'rgba(4, 6, 16, 0.88)');
+    this.ctx.fillStyle = grad;
     this.ctx.fillRect(0, 0, sw, sh);
 
-    // Title Banner
     const cx = Math.floor(sw / 2);
+
+    // Orbiting energy blades in the background of the title
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = 'lighter';
+    const colors = ['#3be8d1', '#ff2975', '#ffd747', '#a8ff38', '#9d4edd', '#ff7b24'];
+    for (let i = 0; i < 6; i++) {
+      const ang = t * 1.8 + (i * Math.PI * 2) / 6;
+      const ox = cx + Math.cos(ang) * 280;
+      const oy = 140 + Math.sin(ang * 2) * 36;
+      this.ctx.save();
+      this.ctx.translate(ox, oy);
+      this.ctx.rotate(ang + Math.PI / 4);
+      this.ctx.fillStyle = colors[i];
+      this.ctx.beginPath();
+      this.ctx.moveTo(22, 0);
+      this.ctx.lineTo(-10, -6);
+      this.ctx.lineTo(-16, 0);
+      this.ctx.lineTo(-10, 6);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+    this.ctx.restore();
+
+    // Title Banner with Neon Glow
     this.ctx.textAlign = 'center';
-    this.ctx.font = 'bold 54px monospace';
-    this.ctx.fillStyle = '#1b2618';
-    this.ctx.fillText('TERRARIA', cx + 4, 154);
-    this.ctx.fillStyle = '#4de868';
-    this.ctx.fillText('TERRARIA', cx, 150);
+    this.ctx.font = 'bold 62px monospace';
+    this.ctx.fillStyle = '#091f15';
+    this.ctx.fillText('TERRARIA: BOSS RUSH', cx + 4, 144);
+    this.ctx.fillStyle = '#3be8d1';
+    this.ctx.fillText('TERRARIA: BOSS RUSH', cx, 140);
 
     this.ctx.font = 'bold 16px monospace';
     this.ctx.fillStyle = '#ffd747';
     this.ctx.fillText(
-      'COMPLETE TYPESCRIPT & HTML5 CANVAS EDITION — ALL 14 PRE-HARDMODE & HARDMODE BOSSES',
+      '⚡ GRAND COLOSSEUM ARENA • 14 BOSS GAUNTLET • 360° FLYING MOUNTS • THE ZENITH ⚡',
       cx,
-      188
+      182
     );
 
     const hasSave = !!localStorage.getItem(SAVE_KEY);
     const buttons = [
       {
-        label: '▶ Start 14-Boss Rush (Open Colosseum Arena + Flying Mount!)',
-        y: 235,
-        color: '#6b1d3a',
-        border: '#ff668c',
+        label: '⚔️ START 14-BOSS RUSH GAUNTLET (Grand Colosseum + Flying Mount!)',
+        y: 225,
+        color: '#6b1236',
+        border: '#ff3875',
         action: () => {
           this.initNewWorld(1337, 'arena');
           this.state = 'playing';
@@ -220,10 +245,10 @@ class TerrariaGame {
         }
       },
       {
-        label: 'Open Arena Sandbox (Free Flight Mount + Pick Any of 14 Bosses)',
-        y: 295,
-        color: '#4c266b',
-        border: '#d28cff',
+        label: '🛸 OPEN ARENA SANDBOX (Free Flight + Summon Any of 14 Bosses)',
+        y: 285,
+        color: '#3c1e6e',
+        border: '#c77dff',
         action: () => {
           this.initNewWorld(1337, 'arena');
           this.hud.bossMenuOpen = true;
@@ -232,10 +257,10 @@ class TerrariaGame {
         }
       },
       {
-        label: 'New Classic Survival World (Biomes, Mining & Crafting)',
-        y: 355,
-        color: '#28593a',
-        border: '#5ce68c',
+        label: '🌲 CLASSIC SURVIVAL WORLD (Procedural Biomes, Mining & Crafting)',
+        y: 345,
+        color: '#1b4d3e',
+        border: '#3be8d1',
         action: () => {
           this.initNewWorld(Math.floor(Math.random() * 999999), 'survival');
           this.state = 'playing';
@@ -243,10 +268,10 @@ class TerrariaGame {
         }
       },
       {
-        label: hasSave ? 'Continue Saved World' : 'No Saved World Yet',
-        y: 415,
-        color: hasSave ? '#24476b' : '#282d38',
-        border: hasSave ? '#6bb5ff' : '#555d6e',
+        label: hasSave ? '💾 CONTINUE SAVED WORLD' : 'NO SAVED WORLD YET',
+        y: 405,
+        color: hasSave ? '#1d3c6b' : '#222634',
+        border: hasSave ? '#5ce1ff' : '#4a5268',
         action: () => {
           if (hasSave && this.loadGame()) {
             this.state = 'playing';
@@ -260,15 +285,15 @@ class TerrariaGame {
     const my = this.input.mouseY;
 
     for (const b of buttons) {
-      const bw = 540;
-      const bh = 46;
+      const bw = 580;
+      const bh = 48;
       const bx = cx - bw / 2;
       const hovered = pointInRect(mx, my, { x: bx, y: b.y, w: bw, h: bh });
 
-      this.ctx.fillStyle = hovered ? '#3a6ea5' : b.color;
+      this.ctx.fillStyle = hovered ? '#2c6eb5' : b.color;
       this.ctx.fillRect(bx, b.y, bw, bh);
       this.ctx.strokeStyle = hovered ? '#ffd747' : b.border;
-      this.ctx.lineWidth = 2.5;
+      this.ctx.lineWidth = hovered ? 3 : 2;
       this.ctx.strokeRect(bx, b.y, bw, bh);
 
       this.ctx.font = 'bold 15px monospace';
@@ -280,26 +305,26 @@ class TerrariaGame {
       }
     }
 
-    // Feature highlights box
-    this.ctx.font = '13px monospace';
-    this.ctx.fillStyle = '#dce8ff';
+    // Loadout & Controls Showcase
+    this.ctx.font = 'bold 13px monospace';
+    this.ctx.fillStyle = '#3be8d1';
     this.ctx.fillText(
-      'Biomes: Forest • Desert • Snow • Corruption • Jungle • Dungeon • Floating Islands • Lihzahrd Temple • Underworld • Hallow',
+      'STARTER ARSENAL: [1] The Zenith • [2] Terra Blade • [3] Solar Eruption • [4] S.D.M.G. • [5] Tsunami • [6] Last Prism • [7] Razorblade Typhoon • [8] Meowmere',
       cx,
-      475
+      478
     );
     this.ctx.fillStyle = '#ff96ff';
     this.ctx.fillText(
-      'Bosses: King Slime • Eye of Cthulhu • Eater of Worlds • Queen Bee • Skeletron • Wall of Flesh • The Twins • Destroyer • Skeletron Prime • Plantera • Golem • Duke Fishron • Lunatic Cultist • Moon Lord',
+      'ALL 14 BOSSES: King Slime • Eye of Cthulhu • Eater of Worlds • Queen Bee • Skeletron • Wall of Flesh • The Twins • Destroyer • Skeletron Prime • Plantera • Golem • Duke Fishron • Lunatic Cultist • Moon Lord',
       cx,
-      500
+      504
     );
 
     this.ctx.textAlign = 'left';
   }
 
   private updateGame(dt: number): void {
-    // Advance Day/Night cycle (1 full day = 12 real minutes)
+    // Advance Day/Night cycle
     const prevDay = this.world.isDaytime();
     this.world.timeOfDay += dt * 2.0;
     if (this.world.timeOfDay >= 1440) {
@@ -310,12 +335,7 @@ class TerrariaGame {
     if (!prevDay && nowDay) {
       this.hud.addChat(`Day ${this.world.dayCount} has dawned!`, '#ffeb57');
     } else if (prevDay && !nowDay) {
-      this.hud.addChat('Night has fallen... Watch out for creatures of the dark!', '#ff9696');
-      // Spawn Fallen Stars occasionally at night
-      for (let s = 0; s < 3; s++) {
-        const sx = Math.floor(40 + Math.random() * (this.world.width - 80));
-        this.world.spawnDrop(sx * TILE_SIZE, (this.world.surfaceY[sx] - 4) * TILE_SIZE, 'fallen_star', 1);
-      }
+      this.hud.addChat('Blood & Starlight fill the Colosseum sky...', '#ff9696');
     }
 
     if (this.input.wasPressed('F5')) {
@@ -323,8 +343,8 @@ class TerrariaGame {
     }
 
     // Zoom controls (- / +)
-    if (this.input.wasPressed('Equal')) this.zoom = clamp(this.zoom + 0.25, 1.0, 3.0);
-    if (this.input.wasPressed('Minus')) this.zoom = clamp(this.zoom - 0.25, 1.0, 3.0);
+    if (this.input.wasPressed('Equal')) this.zoom = clamp(this.zoom + 0.2, 0.9, 2.8);
+    if (this.input.wasPressed('Minus')) this.zoom = clamp(this.zoom - 0.2, 0.9, 2.8);
 
     const viewW = this.canvas.width / this.zoom;
     const viewH = this.canvas.height / this.zoom;
@@ -351,21 +371,6 @@ class TerrariaGame {
       (id) => summonCallback(id),
       () => this.saveGame()
     );
-
-    // Right-click Town NPC interaction
-    if (!uiBlocking && this.input.mouseRightJustPressed) {
-      const clickedNPC = this.npcs.findClickedNPC(
-        this.input.worldMouseX,
-        this.input.worldMouseY,
-        this.player.x,
-        this.player.y
-      );
-      if (clickedNPC) {
-        this.hud.activeNPC = clickedNPC;
-        this.hud.dialogueIndex = 0;
-        this.audio.play('menu');
-      }
-    }
 
     this.player.update(
       dt,
@@ -411,7 +416,6 @@ class TerrariaGame {
       biome,
       !!this.bosses.activeBoss
     );
-    this.npcs.update(dt, this.world);
     this.bosses.update(
       dt,
       this.world,
@@ -425,19 +429,21 @@ class TerrariaGame {
     this.world.updateDrops(dt);
     this.particles.update(dt);
 
-    // Camera follow
+    // Dynamic Camera follow with subtle mouse-look lead
+    const mouseLeadX = ((this.input.mouseX - this.canvas.width * 0.5) / this.zoom) * 0.14;
+    const mouseLeadY = ((this.input.mouseY - this.canvas.height * 0.5) / this.zoom) * 0.14;
     const targetCamX = clamp(
-      this.player.x - viewW * 0.5,
+      this.player.x + mouseLeadX - viewW * 0.5,
       0,
       this.world.width * TILE_SIZE - viewW
     );
     const targetCamY = clamp(
-      this.player.y - viewH * 0.5,
+      this.player.y + mouseLeadY - viewH * 0.5,
       0,
       this.world.height * TILE_SIZE - viewH
     );
-    this.camX = lerp(this.camX, targetCamX, Math.min(1, dt * 10));
-    this.camY = lerp(this.camY, targetCamY, Math.min(1, dt * 10));
+    this.camX = lerp(this.camX, targetCamX, Math.min(1, dt * 11));
+    this.camY = lerp(this.camY, targetCamY, Math.min(1, dt * 11));
 
     // Update World Liquids & Lighting in Active Viewport
     const camTileX = Math.floor(this.camX / TILE_SIZE);
@@ -449,6 +455,8 @@ class TerrariaGame {
     const heldId = this.player.getHeldItem()?.id;
     const holdingLight =
       heldId === 'torch' ||
+      heldId === 'zenith' ||
+      heldId === 'terra_blade' ||
       heldId === 'fiery_greatsword' ||
       heldId === 'solar_eruption' ||
       heldId === 'nights_edge';
@@ -477,7 +485,7 @@ class TerrariaGame {
 
     this.audio.updateMusic(dt, track);
 
-    //Enemy projectile hits against Player
+    // Enemy projectile hits against Player
     for (let i = this.projectiles.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles.projectiles[i];
       if (p.friendly) continue;
@@ -507,16 +515,27 @@ class TerrariaGame {
     const pty = Math.floor(this.player.y / TILE_SIZE);
     const biome = this.world.getBiomeAt(ptx, pty);
 
+    // Apply Screen Shake offset
+    const shakeX =
+      this.particles.shakeIntensity > 0
+        ? (Math.random() - 0.5) * 2 * this.particles.shakeIntensity
+        : 0;
+    const shakeY =
+      this.particles.shakeIntensity > 0
+        ? (Math.random() - 0.5) * 2 * this.particles.shakeIntensity
+        : 0;
+    const renderCamX = this.camX + shakeX;
+    const renderCamY = this.camY + shakeY;
+
     this.ctx.save();
     this.ctx.scale(this.zoom, this.zoom);
 
-    this.world.render(this.ctx, this.camX, this.camY, sw, sh, this.zoom, this.atlas, biome);
-    this.npcs.render(this.ctx, this.camX, this.camY);
-    this.enemies.render(this.ctx, this.camX, this.camY);
-    this.bosses.render(this.ctx, this.camX, this.camY, this.player);
-    this.player.render(this.ctx, this.camX, this.camY, this.atlas);
-    this.projectiles.render(this.ctx, this.camX, this.camY);
-    this.particles.render(this.ctx, this.camX, this.camY);
+    this.world.render(this.ctx, renderCamX, renderCamY, sw, sh, this.zoom, this.atlas, biome);
+    this.enemies.render(this.ctx, renderCamX, renderCamY);
+    this.bosses.render(this.ctx, renderCamX, renderCamY, this.player);
+    this.player.render(this.ctx, renderCamX, renderCamY, this.atlas);
+    this.projectiles.render(this.ctx, renderCamX, renderCamY);
+    this.particles.render(this.ctx, renderCamX, renderCamY);
 
     // Tile selection cursor highlight when holding a tool or block
     const held = this.player.getHeldItem();
@@ -524,14 +543,23 @@ class TerrariaGame {
       held &&
       (held.category === 'tool' || held.placeTile !== undefined || held.placeWall !== undefined)
     ) {
-      const hx = this.input.tileMouseX * TILE_SIZE - this.camX;
-      const hy = this.input.tileMouseY * TILE_SIZE - this.camY;
+      const hx = this.input.tileMouseX * TILE_SIZE - renderCamX;
+      const hy = this.input.tileMouseY * TILE_SIZE - renderCamY;
       this.ctx.strokeStyle = 'rgba(255, 235, 87, 0.65)';
       this.ctx.lineWidth = 1;
       this.ctx.strokeRect(hx, hy, TILE_SIZE, TILE_SIZE);
     }
 
     this.ctx.restore();
+
+    // Screen Flash Overlay (Boss Kill / Phase Transition / Super Nova)
+    if (this.particles.flashAlpha > 0.01) {
+      this.ctx.save();
+      this.ctx.globalAlpha = this.particles.flashAlpha;
+      this.ctx.fillStyle = this.particles.flashColor;
+      this.ctx.fillRect(0, 0, sw, sh);
+      this.ctx.restore();
+    }
 
     // Death Banner
     if (this.player.dead) {

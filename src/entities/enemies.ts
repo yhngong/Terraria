@@ -32,6 +32,7 @@ let nextEnemyId = 1;
 
 export class EnemyManager {
   enemies: Enemy[] = [];
+  allowNaturalSpawns = false;
   private spawnTimer = 2.0;
 
   spawnEnemy(type: string, x: number, y: number): Enemy {
@@ -282,12 +283,14 @@ export class EnemyManager {
     biome: BiomeType,
     bossActive: boolean
   ): void {
-    // Natural biome enemy spawning
-    this.spawnTimer -= dt;
-    const maxEnemies = bossActive ? 3 : 10;
-    if (this.spawnTimer <= 0 && this.enemies.length < maxEnemies && !player.dead) {
-      this.spawnTimer = world.hardmode ? 2.4 : 3.2;
-      this.trySpawnNatural(world, player, biome);
+    // Natural biome enemy spawning (disabled in Boss Rush Arena so only bosses & boss minions appear)
+    if (this.allowNaturalSpawns) {
+      this.spawnTimer -= dt;
+      const maxEnemies = bossActive ? 3 : 10;
+      if (this.spawnTimer <= 0 && this.enemies.length < maxEnemies && !player.dead) {
+        this.spawnTimer = world.hardmode ? 2.4 : 3.2;
+        this.trySpawnNatural(world, player, biome);
+      }
     }
 
     const meleeBox = player.getMeleeHitbox();

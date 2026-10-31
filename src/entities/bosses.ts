@@ -972,8 +972,24 @@ export class BossManager {
         break;
     }
 
+    // Spawn afterimages for fast-moving boss parts
+    for (const part of b.parts) {
+      if (part.hp > 0 && Math.hypot(part.vx, part.vy) > 260) {
+        const trailCol =
+          b.type === 'duke_fishron'
+            ? '#1cb3ff'
+            : b.type === 'queen_bee'
+            ? '#ffd747'
+            : b.type === 'plantera'
+            ? '#ff59b8'
+            : '#ff2942';
+        particles.spawnAfterimage(part.x, part.y, part.radius * 0.88, trailCol, 0.22);
+      }
+    }
+
     // Sweeping Deathray collision
     if (b.deathray.active) {
+      particles.triggerShake(4, 0.1);
       b.deathray.timer -= dt;
       b.deathray.angle += b.deathray.angularVel * dt;
       if (b.deathray.timer <= 0) {
@@ -1150,7 +1166,11 @@ export class BossManager {
     const dropY = b.parts[0]?.y || player.y;
 
     audio.play('explosion');
-    particles.spawn(dropX, dropY, '#ffdd44', 45, 220, 4.5, 180, true);
+    particles.triggerShake(18, 0.65);
+    particles.triggerFlash('#ffffff', 0.45);
+    particles.spawnShockwave(dropX, dropY, '#ffd747', 280, 0.6, 8);
+    particles.spawnShockwave(dropX, dropY, '#ff2957', 190, 0.45, 6);
+    particles.spawn(dropX, dropY, '#ffdd44', 65, 260, 5, 180, true);
     world.defeatedBosses.add(b.type);
     onChat(`${b.title} has been defeated!`, '#66ff8c');
     player.coins += b.tier * 2500;
@@ -2099,7 +2119,7 @@ export class BossManager {
   }
 
   // =========================================================
-  // PROCEDURAL PIXEL-ART BOSS RENDERER
+  // PROCEDURAL PIXEL-ART BOSS RENDERER (1000x COOLER EDITION)
   // =========================================================
   render(ctx: CanvasRenderingContext2D, camX: number, camY: number, player: Player): void {
     const b = this.activeBoss;
@@ -2107,240 +2127,544 @@ export class BossManager {
 
     ctx.save();
 
-    // 1. Background connectors (Wall of Flesh wall, Twins cord, Skeletron arms, Golem chains, Plantera vines, Moon Lord torso)
+    // 1. Background Connectors & Grand Boss Structures
     if (b.type === 'wall_of_flesh') {
       const wx = Math.floor(b.x - camX);
-      ctx.fillStyle = '#7a1c24';
-      ctx.fillRect(wx - 45, 0, 50, ctx.canvas.height);
-      ctx.fillStyle = '#a82835';
-      for (let y = 0; y < ctx.canvas.height; y += 28) {
-        ctx.fillRect(wx - 12, y, 18, 18);
+      // Towering Flesh Wall with pulsing arterial glow
+      const wallGrad = ctx.createLinearGradient(wx - 70, 0, wx + 20, 0);
+      wallGrad.addColorStop(0, '#1f050a');
+      wallGrad.addColorStop(0.65, '#6e1423');
+      wallGrad.addColorStop(1, '#c92a42');
+      ctx.fillStyle = wallGrad;
+      ctx.fillRect(wx - 70, 0, 85, ctx.canvas.height);
+
+      for (let y = 0; y < ctx.canvas.height; y += 24) {
+        const wobble = Math.sin(b.timer * 5 + y * 0.08) * 6;
+        ctx.fillStyle = '#9e1f32';
+        ctx.beginPath();
+        ctx.arc(wx + 8 + wobble, y + 12, 16, 0, Math.PI * 2);
+        ctx.fill();
       }
-      // Tendrils to The Hungry
-      ctx.strokeStyle = '#9e2a3b';
-      ctx.lineWidth = 3;
+      // Sinewy Tendrils to The Hungry
       for (const p of b.parts) {
         if (p.role === 'hungry' && p.hp > 0) {
+          ctx.strokeStyle = '#ff385c';
+          ctx.lineWidth = 4;
           ctx.beginPath();
-          ctx.moveTo(wx, b.y - camY);
-          ctx.lineTo(p.x - camX, p.y - camY);
+          ctx.moveTo(wx + 5, b.y - camY);
+          const midX = (wx + (p.x - camX)) * 0.5;
+          const midY = (b.y - camY + (p.y - camY)) * 0.5 + Math.sin(b.timer * 8) * 16;
+          ctx.quadraticCurveTo(midX, midY, p.x - camX, p.y - camY);
           ctx.stroke();
         }
       }
     } else if (b.type === 'the_twins' && b.parts.length === 2) {
       const [p1, p2] = b.parts;
       if (p1.hp > 0 && p2.hp > 0) {
-        ctx.strokeStyle = '#a82835';
-        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#d92b4b';
+        ctx.lineWidth = 6;
         ctx.beginPath();
+        const mx = (p1.x + p2.x) * 0.5 - camX;
+        const my = (p1.y + p2.y) * 0.5 - camY + Math.sin(b.timer * 6) * 22;
         ctx.moveTo(p1.x - camX, p1.y - camY);
-        ctx.lineTo(p2.x - camX, p2.y - camY);
+        ctx.quadraticCurveTo(mx, my, p2.x - camX, p2.y - camY);
         ctx.stroke();
       }
     } else if (b.type === 'skeletron' || b.type === 'skeletron_prime') {
       const head = b.parts.find((p) => p.role === 'head');
       if (head) {
-        ctx.strokeStyle = b.type === 'skeletron' ? '#c9c2ab' : '#8a95a6';
-        ctx.lineWidth = 5;
+        const isPrime = b.type === 'skeletron_prime';
         for (const p of b.parts) {
           if (p !== head && p.hp > 0) {
+            const hx = head.x - camX;
+            const hy = head.y - camY;
+            const px = p.x - camX;
+            const py = p.y - camY;
+            const elbowX = (hx + px) * 0.5 + (px < hx ? -22 : 22);
+            const elbowY = (hy + py) * 0.5 - 24;
+            // Articulated 2-segment bone / cyber arm
+            ctx.strokeStyle = isPrime ? '#8a99ad' : '#d6cfc2';
+            ctx.lineWidth = 8;
             ctx.beginPath();
-            ctx.moveTo(head.x - camX, head.y - camY);
-            ctx.lineTo(p.x - camX, p.y - camY);
+            ctx.moveTo(hx, hy);
+            ctx.lineTo(elbowX, elbowY);
+            ctx.lineTo(px, py);
             ctx.stroke();
+            // Elbow joint
+            ctx.fillStyle = isPrime ? '#ff2942' : '#aba28f';
+            ctx.beginPath();
+            ctx.arc(elbowX, elbowY, 6, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
     } else if (b.type === 'golem') {
       const body = b.parts.find((p) => p.role === 'body');
       if (body) {
-        ctx.strokeStyle = '#ff9922';
-        ctx.lineWidth = 4;
         for (const p of b.parts) {
           if ((p.role === 'left_fist' || p.role === 'right_fist') && p.hp > 0) {
-            ctx.beginPath();
-            ctx.moveTo(body.x - camX, body.y - camY);
-            ctx.lineTo(p.x - camX, p.y - camY);
-            ctx.stroke();
+            const bx = body.x - camX;
+            const by = body.y - camY;
+            const fx = p.x - camX;
+            const fy = p.y - camY;
+            // Glowing solar chain links
+            const steps = 7;
+            for (let s = 0; s <= steps; s++) {
+              const t = s / steps;
+              const lx = bx + (fx - bx) * t;
+              const ly = by + (fy - by) * t;
+              ctx.fillStyle = s % 2 === 0 ? '#ff9922' : '#ffee55';
+              ctx.fillRect(lx - 4, ly - 4, 8, 8);
+            }
           }
         }
       }
     } else if (b.type === 'plantera') {
       const p = b.parts[0];
       if (p) {
-        ctx.strokeStyle = '#48a828';
-        ctx.lineWidth = 4;
         for (let k = 0; k < 3; k++) {
-          const a = (k / 3) * Math.PI * 2 + 0.5;
+          const a = (k / 3) * Math.PI * 2 + Math.sin(b.timer * 0.8 + k) * 0.4;
+          const vx = p.x - camX + Math.cos(a) * 155;
+          const vy = p.y - camY + Math.sin(a) * 155;
+          ctx.strokeStyle = '#389c24';
+          ctx.lineWidth = 6;
           ctx.beginPath();
           ctx.moveTo(p.x - camX, p.y - camY);
-          ctx.lineTo(p.x - camX + Math.cos(a) * 130, p.y - camY + Math.sin(a) * 130);
+          ctx.lineTo(vx, vy);
           ctx.stroke();
+          // Vine hook claw
+          ctx.fillStyle = '#ff59b8';
+          ctx.beginPath();
+          ctx.arc(vx, vy, 9, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
     } else if (b.type === 'moon_lord') {
-      // Giant Moon Lord Celestial Torso & Shoulders
+      // Colossal Celestial Moon Lord Torso, Horned Brow, Tentacle Beard & Ribcage
       const mx = Math.floor(b.x - camX);
       const my = Math.floor(b.y - camY);
-      ctx.fillStyle = 'rgba(26, 68, 66, 0.78)';
-      ctx.fillRect(mx - 85, my - 70, 170, 150);
-      ctx.fillStyle = 'rgba(46, 128, 118, 0.85)';
-      ctx.fillRect(mx - 65, my - 50, 130, 110);
-      // Ribcage bars
-      ctx.fillStyle = '#a8cfc7';
-      for (let r = -20; r <= 40; r += 20) {
-        ctx.fillRect(mx - 50, my + r, 100, 6);
+
+      // Outer cosmic aura
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = 'rgba(43, 230, 184, 0.16)';
+      ctx.beginPath();
+      ctx.arc(mx, my - 10, 145, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Shoulders & Chest Armor
+      ctx.fillStyle = '#183836';
+      ctx.beginPath();
+      ctx.moveTo(mx - 120, my - 45);
+      ctx.lineTo(mx + 120, my - 45);
+      ctx.lineTo(mx + 75, my + 85);
+      ctx.lineTo(mx - 75, my + 85);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#29635e';
+      ctx.fillRect(mx - 72, my - 40, 144, 110);
+
+      // Cthulhu Head & Tentacle Beard behind Head Eye
+      ctx.fillStyle = '#245954';
+      ctx.beginPath();
+      ctx.arc(mx, my - 90, 48, 0, Math.PI * 2);
+      ctx.fill();
+      // Cthulhu Horns
+      ctx.fillStyle = '#96cfc4';
+      ctx.beginPath();
+      ctx.moveTo(mx - 35, my - 115);
+      ctx.lineTo(mx - 68, my - 150);
+      ctx.lineTo(mx - 18, my - 128);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(mx + 35, my - 115);
+      ctx.lineTo(mx + 68, my - 150);
+      ctx.lineTo(mx + 18, my - 128);
+      ctx.fill();
+
+      // Writhing Cthulhu Tentacle Beard
+      ctx.strokeStyle = '#2be6b8';
+      ctx.lineWidth = 6;
+      for (let t = -2; t <= 2; t++) {
+        ctx.beginPath();
+        ctx.moveTo(mx + t * 12, my - 55);
+        ctx.quadraticCurveTo(
+          mx + t * 18 + Math.sin(b.timer * 5 + t) * 14,
+          my - 25,
+          mx + t * 15,
+          my - 5
+        );
+        ctx.stroke();
+      }
+
+      // Thoracic Ribcage around Core
+      ctx.fillStyle = '#b0ded6';
+      for (let r = -15; r <= 55; r += 18) {
+        ctx.fillRect(mx - 56, my + r, 40, 7);
+        ctx.fillRect(mx + 16, my + r, 40, 7);
       }
     }
 
-    // 2. Render each Boss Part
+    // 2. Render each Boss Part with Multi-Layer Pixel Art & Glow
     for (const part of b.parts) {
       if (part.hp <= 0) continue;
       const sx = Math.floor(part.x - camX);
       const sy = Math.floor(part.y - camY);
       const r = part.radius;
 
+      // Subtle additive boss aura
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = b.isHardmode ? 'rgba(255, 60, 140, 0.14)' : 'rgba(80, 160, 255, 0.14)';
+      ctx.beginPath();
+      ctx.arc(sx, sy, r * 1.38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
       if (b.type === 'king_slime') {
-        // Ninja silhouette inside slime
-        ctx.fillStyle = '#1b1e26';
-        ctx.fillRect(sx - 5, sy - 6, 10, 16);
-        // Translucent royal blue body
-        ctx.fillStyle = 'rgba(43, 134, 255, 0.78)';
+        // Katana Ninja inside King Slime
+        ctx.fillStyle = '#11131a';
+        ctx.fillRect(sx - 6, sy - 8, 12, 18);
+        ctx.fillStyle = '#ff2942';
+        ctx.fillRect(sx - 6, sy - 6, 12, 3); // Red ninja headband
+        // Royal Gel Body
+        const slimeGrad = ctx.createRadialGradient(sx - r * 0.25, sy - r * 0.2, 4, sx, sy, r);
+        slimeGrad.addColorStop(0, 'rgba(130, 215, 255, 0.88)');
+        slimeGrad.addColorStop(0.6, 'rgba(38, 128, 255, 0.82)');
+        slimeGrad.addColorStop(1, 'rgba(18, 68, 180, 0.90)');
+        ctx.fillStyle = slimeGrad;
         ctx.beginPath();
         ctx.arc(sx, sy + 4, r, Math.PI, 0, false);
-        ctx.lineTo(sx + r, sy + r * 0.7);
-        ctx.lineTo(sx - r, sy + r * 0.7);
+        ctx.lineTo(sx + r, sy + r * 0.72);
+        ctx.lineTo(sx - r, sy + r * 0.72);
         ctx.closePath();
         ctx.fill();
-        // Golden Crown with Ruby
+
+        // Ornate Golden Crown with Gems
         ctx.fillStyle = '#ffd747';
-        ctx.fillRect(sx - 18, sy - r - 8, 36, 12);
-        ctx.fillRect(sx - 18, sy - r - 15, 7, 8);
-        ctx.fillRect(sx - 4, sy - r - 17, 8, 10);
-        ctx.fillRect(sx + 11, sy - r - 15, 7, 8);
+        ctx.fillRect(sx - 22, sy - r - 8, 44, 12);
+        ctx.beginPath();
+        ctx.moveTo(sx - 22, sy - r - 8);
+        ctx.lineTo(sx - 22, sy - r - 20);
+        ctx.lineTo(sx - 11, sy - r - 10);
+        ctx.lineTo(sx, sy - r - 24);
+        ctx.lineTo(sx + 11, sy - r - 10);
+        ctx.lineTo(sx + 22, sy - r - 20);
+        ctx.lineTo(sx + 22, sy - r - 8);
+        ctx.closePath();
+        ctx.fill();
         ctx.fillStyle = '#ff2942';
-        ctx.fillRect(sx - 3, sy - r - 6, 6, 6);
+        ctx.fillRect(sx - 4, sy - r - 6, 8, 6);
+        ctx.fillStyle = '#3be8d1';
+        ctx.fillRect(sx - 16, sy - r - 5, 5, 4);
+        ctx.fillRect(sx + 11, sy - r - 5, 5, 4);
       } else if (b.type === 'eye_of_cthulhu' || b.type === 'the_twins') {
         const angle = Math.atan2(player.y - part.y, player.x - part.x);
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(angle);
-        // Trailing optic nerve tendrils
-        ctx.fillStyle = '#d92b3a';
-        ctx.fillRect(-r - 16, -8, 18, 4);
-        ctx.fillRect(-r - 20, 0, 22, 4);
-        ctx.fillRect(-r - 16, 8, 18, 4);
+
+        // Writhing crimson optic tendrils behind eyeball
+        ctx.strokeStyle = '#c91e38';
+        ctx.lineWidth = 4;
+        for (let t = -2; t <= 2; t++) {
+          ctx.beginPath();
+          ctx.moveTo(-r * 0.7, t * 7);
+          const wave = Math.sin(b.timer * 10 + t * 1.4) * 9;
+          ctx.quadraticCurveTo(-r - 14, t * 9 + wave, -r - 28, t * 11 - wave);
+          ctx.stroke();
+        }
 
         const isPhase2 = (part.phase || b.phase) === 2;
-        ctx.fillStyle = isPhase2 && b.type === 'the_twins' ? '#9aa6b8' : '#f0f0f7';
+        ctx.fillStyle = isPhase2 && b.type === 'the_twins' ? '#b8c4d4' : '#f2f2f8';
         ctx.beginPath();
         ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.fill();
 
-        if (isPhase2) {
-          // Fanged Mouth / Mechanical Turret
-          ctx.fillStyle = '#7a1622';
+        // Bloodshot veins on sclera
+        ctx.strokeStyle = '#d92b3a';
+        ctx.lineWidth = 2;
+        for (let v = -1; v <= 1; v += 2) {
           ctx.beginPath();
-          ctx.arc(r * 0.3, 0, r * 0.65, -1.1, 1.1);
-          ctx.lineTo(0, 0);
-          ctx.closePath();
-          ctx.fill();
-          ctx.fillStyle = '#ffffff';
-          for (let t = -12; t <= 12; t += 8) {
-            ctx.fillRect(r * 0.35, t - 2, 6, 4);
+          ctx.moveTo(-r * 0.6, v * r * 0.4);
+          ctx.lineTo(0, v * r * 0.65);
+          ctx.stroke();
+        }
+
+        if (isPhase2) {
+          if (part.role === 'retinazer') {
+            // Mechanical Laser Turret Barrel
+            ctx.fillStyle = '#475263';
+            ctx.fillRect(4, -10, r + 10, 20);
+            ctx.fillStyle = '#ff2942';
+            ctx.fillRect(10, -5, r + 6, 10);
+          } else {
+            // Savage Fanged Maw (Eye of Cthulhu Phase 2 & Spazmatism Phase 2)
+            ctx.fillStyle = part.role === 'spazmatism' ? '#1c4f1c' : '#6e0d1c';
+            ctx.beginPath();
+            ctx.arc(r * 0.25, 0, r * 0.72, -1.15, 1.15);
+            ctx.lineTo(-4, 0);
+            ctx.closePath();
+            ctx.fill();
+            // Interlocking Razor Teeth
+            ctx.fillStyle = '#ffffff';
+            for (let t = -16; t <= 16; t += 8) {
+              ctx.beginPath();
+              ctx.moveTo(r * 0.25, t - 3);
+              ctx.lineTo(r * 0.75, t);
+              ctx.lineTo(r * 0.25, t + 3);
+              ctx.fill();
+            }
           }
         } else {
-          // Iris
-          ctx.fillStyle =
-            part.role === 'spazmatism' ? '#38eb5c' : part.role === 'retinazer' ? '#ff2942' : '#2b6eff';
+          // Detailed Multi-Ring Iris & Glossy Pupil
+          const irisCol =
+            part.role === 'spazmatism'
+              ? '#38eb5c'
+              : part.role === 'retinazer'
+              ? '#ff2942'
+              : '#2b6eff';
+          ctx.fillStyle = irisCol;
           ctx.beginPath();
-          ctx.arc(r * 0.42, 0, r * 0.42, 0, Math.PI * 2);
+          ctx.arc(r * 0.42, 0, r * 0.46, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = '#111';
+          ctx.fillStyle = '#0d0f14';
           ctx.beginPath();
-          ctx.arc(r * 0.5, 0, r * 0.2, 0, Math.PI * 2);
+          ctx.arc(r * 0.52, 0, r * 0.22, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(r * 0.38, -5, 3.5, 0, Math.PI * 2);
           ctx.fill();
         }
         ctx.restore();
       } else if (b.type === 'eater_of_worlds' || b.type === 'the_destroyer') {
         const isMech = b.type === 'the_destroyer';
-        ctx.fillStyle = isMech ? '#7c8799' : '#6b479e';
+        ctx.save();
+        ctx.translate(sx, sy);
+        const segAngle = Math.atan2(part.vy || 0, part.vx || 1);
+        ctx.rotate(segAngle);
+
+        // Armored Segment Carapace
+        ctx.fillStyle = isMech ? '#6c7a8c' : '#563882';
         ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = isMech ? '#ff2942' : '#a4cf55';
+        ctx.strokeStyle = isMech ? '#b0c0d4' : '#8559c9';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Pincer Mandibles on Head Segments
+        if (part.role === 'head') {
+          ctx.fillStyle = isMech ? '#d0dce8' : '#a4cf55';
+          ctx.beginPath();
+          ctx.moveTo(r * 0.6, -r * 0.6);
+          ctx.lineTo(r + 14, -r * 0.3);
+          ctx.lineTo(r * 0.5, -2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(r * 0.6, r * 0.6);
+          ctx.lineTo(r + 14, r * 0.3);
+          ctx.lineTo(r * 0.5, 2);
+          ctx.fill();
+        }
+
+        // Glowing Core Node / Corrupt Eye
+        ctx.fillStyle = isMech ? '#ff2942' : '#b84dff';
         ctx.beginPath();
-        ctx.arc(sx, sy, r * 0.42, 0, Math.PI * 2);
+        ctx.arc(0, 0, r * 0.45, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       } else if (b.type === 'queen_bee') {
-        // Flapping wings
-        const flap = Math.sin(performance.now() * 0.04) * 10;
-        ctx.fillStyle = 'rgba(210, 240, 255, 0.75)';
-        ctx.fillRect(sx - 18, sy - r - 12 + flap, 36, 18);
-        // Striped abdomen
+        const flap = Math.sin(performance.now() * 0.05) * 14;
+        // Iridescent double wings
+        ctx.fillStyle = 'rgba(180, 240, 255, 0.68)';
+        ctx.beginPath();
+        ctx.ellipse(sx - 10, sy - r + flap * 0.5, 22, 12, -0.4, 0, Math.PI * 2);
+        ctx.ellipse(sx + 10, sy - r - flap * 0.5, 22, 12, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Striped Royal Chitin Body
         ctx.fillStyle = '#f5b922';
         ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.ellipse(sx, sy, r * 1.15, r * 0.9, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = '#241e16';
-        ctx.fillRect(sx - r + 6, sy - 10, r * 2 - 12, 7);
-        ctx.fillRect(sx - r + 6, sy + 4, r * 2 - 12, 7);
+        ctx.fillStyle = '#1f1912';
+        ctx.fillRect(sx - r + 4, sy - 12, r * 2 - 8, 7);
+        ctx.fillRect(sx - r + 4, sy + 2, r * 2 - 8, 7);
+        // Stinger tip & glowing crimson eye
+        ctx.fillStyle = '#ff2942';
+        ctx.fillRect(sx + (player.x >= part.x ? 14 : -22), sy - 8, 8, 8);
       } else if (b.type === 'skeletron' || b.type === 'skeletron_prime') {
         const isPrime = b.type === 'skeletron_prime';
         ctx.save();
         ctx.translate(sx, sy);
         if (part.role === 'head' && b.phase === 2) {
-          ctx.rotate(b.timer * 14);
+          ctx.rotate(b.timer * 16);
+          if (isPrime) {
+            // Spinning Titanium Skull Spikes
+            ctx.fillStyle = '#ff2942';
+            for (let sp = 0; sp < 8; sp++) {
+              const sa = (sp / 8) * Math.PI * 2;
+              ctx.fillRect(Math.cos(sa) * (r + 2) - 4, Math.sin(sa) * (r + 2) - 4, 8, 8);
+            }
+          }
         }
-        ctx.fillStyle = isPrime ? '#a6b2c4' : '#e0dac3';
-        ctx.beginPath();
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fill();
+
         if (part.role === 'head') {
-          ctx.fillStyle = isPrime ? '#ff2942' : '#111111';
-          ctx.fillRect(-14, -8, 9, 9);
-          ctx.fillRect(5, -8, 9, 9);
-          ctx.fillRect(-10, 10, 20, 6);
+          // Cranium
+          ctx.fillStyle = isPrime ? '#b0bdd1' : '#e3dcc7';
+          ctx.beginPath();
+          ctx.arc(0, -4, r, 0, Math.PI * 2);
+          ctx.fill();
+          // Jawbone
+          ctx.fillRect(-r * 0.65, r * 0.45, r * 1.3, 14);
+          // Glowing Eye Sockets
+          ctx.fillStyle = '#11131a';
+          ctx.fillRect(-16, -12, 11, 11);
+          ctx.fillRect(5, -12, 11, 11);
+          ctx.fillStyle = isPrime ? '#ff2942' : '#ff59b8';
+          ctx.fillRect(-13, -9, 5, 5);
+          ctx.fillRect(8, -9, 5, 5);
+          // Teeth
+          ctx.fillStyle = '#1f242d';
+          for (let t = -12; t <= 12; t += 6) {
+            ctx.fillRect(t - 1, r * 0.5, 3, 8);
+          }
+        } else {
+          // Hand / Prime Weapon Limb
+          ctx.fillStyle = isPrime ? '#8a99ad' : '#dcd4be';
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle =
+            part.role === 'prime_laser'
+              ? '#ff2942'
+              : part.role === 'prime_saw'
+              ? '#ffd747'
+              : '#3be8d1';
+          ctx.fillRect(-r * 0.5, -r * 0.5, r, r);
         }
         ctx.restore();
       } else if (b.type === 'plantera') {
-        ctx.fillStyle = b.phase === 1 ? '#ff59b8' : '#55c934';
-        ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = b.phase === 1 ? '#76db46' : '#8f2436';
-        ctx.beginPath();
-        ctx.arc(sx, sy, r * 0.55, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (b.type === 'golem') {
-        ctx.fillStyle = '#9c521c';
-        ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
-        ctx.fillStyle = '#ffcf24';
-        ctx.fillRect(sx - r * 0.45, sy - r * 0.45, r * 0.9, r * 0.9);
-      } else if (b.type === 'duke_fishron') {
-        ctx.fillStyle = b.phase === 3 ? '#1a428a' : '#1cb89c';
-        ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = b.phase >= 2 ? '#ffee38' : '#ff59b8';
-        ctx.fillRect(sx - 10, sy - 8, 8, 8);
-        ctx.fillRect(sx + 4, sy - 8, 8, 8);
-      } else if (b.type === 'lunatic_cultist') {
-        ctx.fillStyle = '#1f3b82';
-        ctx.fillRect(sx - 12, sy - 18, 24, 36);
-        ctx.fillStyle = '#f2ede4';
-        ctx.fillRect(sx - 9, sy - 16, 18, 12);
-        ctx.fillStyle = '#ffd747';
-        ctx.fillRect(sx - 12, sy - 2, 24, 4);
-      } else if (b.type === 'moon_lord') {
-        ctx.fillStyle = part.invulnerable ? '#284a47' : '#d8f5ef';
-        ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
-        ctx.fill();
-        if (!part.invulnerable) {
-          ctx.fillStyle = '#2be6b8';
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(b.timer * (b.phase === 1 ? 1.5 : 4));
+        // Layered Petals / Monster Maw
+        const petalCount = 8;
+        for (let k = 0; k < petalCount; k++) {
+          const pa = (k / petalCount) * Math.PI * 2;
+          ctx.fillStyle = b.phase === 1 ? '#ff59b8' : '#4ec92e';
           ctx.beginPath();
-          ctx.arc(sx, sy, r * 0.52, 0, Math.PI * 2);
+          ctx.arc(Math.cos(pa) * (r * 0.65), Math.sin(pa) * (r * 0.65), r * 0.52, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = b.phase === 1 ? '#76db46' : '#7a1628';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+        if (b.phase === 2) {
+          ctx.fillStyle = '#ffffff';
+          for (let t = 0; t < 6; t++) {
+            const ta = (t / 6) * Math.PI * 2;
+            ctx.fillRect(Math.cos(ta) * 12 - 3, Math.sin(ta) * 12 - 3, 6, 6);
+          }
+        }
+        ctx.restore();
+      } else if (b.type === 'golem') {
+        // Carved Lihzahrd Sun Idol
+        ctx.fillStyle = '#8c4716';
+        ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
+        ctx.strokeStyle = '#d97e2b';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(sx - r, sy - r, r * 2, r * 2);
+        // Glowing Solar Emblem / Eyes
+        ctx.fillStyle = '#ffee38';
+        if (part.role === 'head') {
+          ctx.fillRect(sx - 12, sy - 6, 8, 8);
+          ctx.fillRect(sx + 4, sy - 6, 8, 8);
+          ctx.fillStyle = '#ff551c';
+          ctx.fillRect(sx - 8, sy + 8, 16, 5);
+        } else {
+          ctx.beginPath();
+          ctx.arc(sx, sy, r * 0.42, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (b.type === 'duke_fishron') {
+        const flap = Math.sin(performance.now() * 0.035) * 12;
+        // Dragon Wings
+        ctx.fillStyle = b.phase === 3 ? '#ff2975' : '#2be6b8';
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - 8);
+        ctx.lineTo(sx - 28, sy - r - 14 + flap);
+        ctx.lineTo(sx + 18, sy - r - 6 + flap);
+        ctx.closePath();
+        ctx.fill();
+
+        // Shark-Dragon Body
+        ctx.fillStyle = b.phase === 3 ? '#142b6e' : '#1cb89c';
+        ctx.beginPath();
+        ctx.ellipse(sx, sy, r * 1.2, r * 0.88, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Glowing Abyssal Eyes
+        ctx.fillStyle = b.phase >= 2 ? '#ffee38' : '#ff59b8';
+        ctx.fillRect(sx - 12, sy - 10, 9, 9);
+        ctx.fillRect(sx + 4, sy - 10, 9, 9);
+      } else if (b.type === 'lunatic_cultist') {
+        // Rotating Golden Arcane Ritual Sigil behind Cultist!
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(b.timer * 2.2);
+        ctx.strokeStyle = 'rgba(255, 215, 71, 0.72)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 44, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let s = 0; s < 6; s++) {
+          const a1 = (s / 6) * Math.PI * 2;
+          const a2 = ((s + 2) / 6) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a1) * 44, Math.sin(a1) * 44);
+          ctx.lineTo(Math.cos(a2) * 44, Math.sin(a2) * 44);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Cultist Robes & Plague Beak Mask
+        ctx.fillStyle = '#1b3682';
+        ctx.fillRect(sx - 13, sy - 18, 26, 36);
+        ctx.fillStyle = '#ffd747';
+        ctx.fillRect(sx - 13, sy - 2, 26, 4);
+        ctx.fillStyle = '#f5f2eb';
+        ctx.fillRect(sx - 9, sy - 16, 18, 12);
+        ctx.fillStyle = '#ff2942';
+        ctx.fillRect(sx - 5, sy - 12, 4, 4);
+        ctx.fillRect(sx + 2, sy - 12, 4, 4);
+      } else if (b.type === 'moon_lord') {
+        // Moon Lord Palm Eyes, Head Eye & Pulsing Phantasmal Core
+        ctx.fillStyle = part.invulnerable ? '#1e3d3a' : '#d8f5ef';
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2be6b8';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        if (!part.invulnerable) {
+          const pulse = 1 + Math.sin(b.timer * 8) * 0.12;
+          ctx.fillStyle = part.role === 'core' ? '#ff2975' : '#2be6b8';
+          ctx.beginPath();
+          ctx.arc(sx, sy, r * 0.56 * pulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(sx, sy, r * 0.25, 0, Math.PI * 2);
           ctx.fill();
         }
       } else {
@@ -2351,26 +2675,47 @@ export class BossManager {
       }
     }
 
-    // 3. Sweeping Phantasmal Deathray Beam!
+    // 3. Blinding Triple-Layered Phantasmal Deathray Beam!
     if (b.deathray.active) {
       const ox = b.deathray.originX - camX;
       const oy = b.deathray.originY - camY;
-      const ex = ox + Math.cos(b.deathray.angle) * 1000;
-      const ey = oy + Math.sin(b.deathray.angle) * 1000;
+      const ex = ox + Math.cos(b.deathray.angle) * 1200;
+      const ey = oy + Math.sin(b.deathray.angle) * 1200;
 
-      ctx.strokeStyle = 'rgba(59, 232, 209, 0.42)';
-      ctx.lineWidth = 34;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+
+      // Outer plasma corona
+      ctx.strokeStyle = 'rgba(43, 230, 184, 0.35)';
+      ctx.lineWidth = 54;
       ctx.beginPath();
       ctx.moveTo(ox, oy);
       ctx.lineTo(ex, ey);
       ctx.stroke();
 
+      // Mid cyan beam
+      ctx.strokeStyle = 'rgba(92, 255, 230, 0.75)';
+      ctx.lineWidth = 28;
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+
+      // White-hot core
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 12;
       ctx.beginPath();
       ctx.moveTo(ox, oy);
       ctx.lineTo(ex, ey);
       ctx.stroke();
+
+      // Origin flare
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(ox, oy, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
     }
 
     ctx.restore();

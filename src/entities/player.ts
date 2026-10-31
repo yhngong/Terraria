@@ -86,31 +86,39 @@ export class Player {
 
   giveStarterKit(): void {
     this.inventory.fill(null);
-    this.inventory[0] = { id: 'nights_edge', count: 1 };
-    this.inventory[1] = { id: 'bees_knees', count: 1 };
-    this.inventory[2] = { id: 'demon_scythe', count: 1 };
-    this.inventory[3] = { id: 'minishark', count: 1 };
-    this.inventory[4] = { id: 'healing_potion', count: 25 };
-    this.inventory[5] = { id: 'mana_potion', count: 25 };
-    this.inventory[6] = { id: 'molten_pickaxe', count: 1 };
-    this.inventory[7] = { id: 'cosmic_car_key', count: 1 };
-    this.inventory[8] = { id: 'flaming_arrow', count: 999 };
-    this.inventory[9] = { id: 'musket_ball', count: 999 };
+    this.inventory[0] = { id: 'zenith', count: 1 };
+    this.inventory[1] = { id: 'terra_blade', count: 1 };
+    this.inventory[2] = { id: 'solar_eruption', count: 1 };
+    this.inventory[3] = { id: 'sdmg', count: 1 };
+    this.inventory[4] = { id: 'tsunami', count: 1 };
+    this.inventory[5] = { id: 'last_prism', count: 1 };
+    this.inventory[6] = { id: 'razorblade_typhoon', count: 1 };
+    this.inventory[7] = { id: 'meowmere', count: 1 };
+    this.inventory[8] = { id: 'super_healing_potion', count: 50 };
+    this.inventory[9] = { id: 'cosmic_car_key', count: 1 };
 
-    this.maxHp = 400;
-    this.hp = 400;
+    // Extra ammo & tools in inventory row 2
+    this.inventory[10] = { id: 'holy_arrow', count: 9999 };
+    this.inventory[11] = { id: 'chlorophyte_bullet', count: 9999 };
+    this.inventory[12] = { id: 'picksaw', count: 1 };
+    this.inventory[13] = { id: 'nights_edge', count: 1 };
+    this.inventory[14] = { id: 'daedalus_stormbow', count: 1 };
+    this.inventory[15] = { id: 'nebula_blaze', count: 1 };
+
+    this.maxHp = 500;
+    this.hp = 500;
     this.maxMana = 200;
     this.mana = 200;
 
-    this.armor.head = { id: 'molten_helmet', count: 1 };
-    this.armor.chest = { id: 'molten_breastplate', count: 1 };
-    this.armor.legs = { id: 'molten_leggings', count: 1 };
+    this.armor.head = { id: 'solar_helmet', count: 1 };
+    this.armor.chest = { id: 'solar_breastplate', count: 1 };
+    this.armor.legs = { id: 'solar_leggings', count: 1 };
 
     this.accessories[0] = { id: 'cosmic_car_key', count: 1 };
-    this.accessories[1] = { id: 'hermes_boots', count: 1 };
-    this.accessories[2] = { id: 'cobalt_shield', count: 1 };
-    this.accessories[3] = { id: 'band_of_regeneration', count: 1 };
-    this.accessories[4] = { id: 'grappling_hook', count: 1 };
+    this.accessories[1] = { id: 'solar_wings', count: 1 };
+    this.accessories[2] = { id: 'ankh_shield', count: 1 };
+    this.accessories[3] = { id: 'celestial_shell', count: 1 };
+    this.accessories[4] = { id: 'band_of_regeneration', count: 1 };
   }
 
   upgradeForBossRushWave(wave: number): string | null {
@@ -630,15 +638,21 @@ export class Player {
 
       // Shift Key: Mount Turbo Dash!
       if (dashPressed && this.mountDashCooldown <= 0) {
-        this.mountDashCooldown = 0.75;
+        this.mountDashCooldown = 0.65;
         const dx = (moveRight ? 1 : moveLeft ? -1 : 0) || this.facing;
         const dy = moveDown ? 1 : jumpHeld ? -1 : 0;
         const len = Math.hypot(dx, dy) || 1;
-        this.vx = (dx / len) * 620;
-        this.vy = (dy / len) * 620;
-        this.invulnTimer = Math.max(this.invulnTimer, 0.25);
+        this.vx = (dx / len) * 680;
+        this.vy = (dy / len) * 680;
+        this.invulnTimer = Math.max(this.invulnTimer, 0.28);
         audio.play('laser');
-        particles.spawn(this.x, this.y, '#3be8d1', 18, 180, 4, 0, true);
+        particles.spawnShockwave(this.x, this.y, '#3be8d1', 90, 0.28, 4);
+        particles.triggerShake(5, 0.15);
+        particles.spawn(this.x, this.y, '#3be8d1', 22, 220, 4, 0, true);
+      }
+
+      if (Math.hypot(this.vx, this.vy) > 220) {
+        particles.spawnAfterimage(this.x, this.y, 12, '#3be8d1', 0.18);
       }
 
       // Ambient Mount Thruster Particles
@@ -976,16 +990,34 @@ export class Player {
         const angle = Math.atan2(input.worldMouseY - this.y, input.worldMouseX - this.x);
         const spd = held.projectileSpeed || 500;
         const dmg = Math.round((held.damage || 20) * this.getDamageMultiplier());
-        projectiles.spawn({
-          x: this.x + Math.cos(angle) * 14,
-          y: this.y + Math.sin(angle) * 14,
-          vx: Math.cos(angle) * spd,
-          vy: Math.sin(angle) * spd,
-          type: held.projectileType,
-          damage: dmg,
-          knockback: held.knockback || 4,
-          friendly: true
-        });
+
+        if (held.projectileType === 'zenith_arc') {
+          for (let k = 0; k < 2; k++) {
+            projectiles.spawn({
+              x: this.x,
+              y: this.y,
+              vx: Math.cos(angle) * spd,
+              vy: Math.sin(angle) * spd,
+              type: 'zenith_arc',
+              damage: dmg,
+              knockback: held.knockback || 6,
+              friendly: true,
+              targetX: input.worldMouseX + (Math.random() - 0.5) * 36,
+              targetY: input.worldMouseY + (Math.random() - 0.5) * 36
+            });
+          }
+        } else {
+          projectiles.spawn({
+            x: this.x + Math.cos(angle) * 14,
+            y: this.y + Math.sin(angle) * 14,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
+            type: held.projectileType,
+            damage: dmg,
+            knockback: held.knockback || 4,
+            friendly: true
+          });
+        }
       }
       return;
     }

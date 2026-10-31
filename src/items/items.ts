@@ -557,6 +557,25 @@ reg({
   value: 1000000,
   tooltip: 'Dropped by the Moon Lord — Fires ricocheting rainbow projectiles'
 });
+reg({
+  id: 'zenith',
+  name: 'Zenith',
+  category: 'melee',
+  iconType: 'sword',
+  maxStack: 1,
+  rarity: 10,
+  color: '#3be8d1',
+  accentColor: '#ff73d0',
+  damage: 245,
+  knockback: 8,
+  useTime: 0.08,
+  autoReuse: true,
+  range: 70,
+  projectileType: 'zenith_arc',
+  projectileSpeed: 980,
+  value: 2000000,
+  tooltip: 'The culmination of a journey — Unleashes a storm of legendary returning blades to your cursor!'
+});
 
 // =========================================================
 // 3. RANGED WEAPONS & AMMO
