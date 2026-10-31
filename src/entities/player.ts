@@ -86,37 +86,67 @@ export class Player {
 
   giveStarterKit(): void {
     this.inventory.fill(null);
-    this.inventory[0] = { id: 'nights_edge', count: 1 };
-    this.inventory[1] = { id: 'molten_fury', count: 1 };
-    this.inventory[2] = { id: 'demon_scythe', count: 1 };
+    this.inventory[0] = { id: 'gold_broadsword', count: 1 };
+    this.inventory[1] = { id: 'demon_bow', count: 1 };
+    this.inventory[2] = { id: 'wand_of_sparking', count: 1 };
     this.inventory[3] = { id: 'minishark', count: 1 };
     this.inventory[4] = { id: 'healing_potion', count: 30 };
-    this.inventory[5] = { id: 'molten_pickaxe', count: 1 };
-    this.inventory[6] = { id: 'molten_hamaxe', count: 1 };
+    this.inventory[5] = { id: 'gold_pickaxe', count: 1 };
+    this.inventory[6] = { id: 'copper_axe', count: 1 };
     this.inventory[7] = { id: 'cosmic_car_key', count: 1 };
     this.inventory[8] = { id: 'flaming_arrow', count: 999 };
     this.inventory[9] = { id: 'musket_ball', count: 999 };
 
-    this.maxHp = 400;
-    this.hp = 400;
-    this.maxMana = 200;
-    this.mana = 200;
+    this.maxHp = 280;
+    this.hp = 280;
+    this.maxMana = 140;
+    this.mana = 140;
 
-    this.armor.head = { id: 'molten_helmet', count: 1 };
-    this.armor.chest = { id: 'molten_breastplate', count: 1 };
-    this.armor.legs = { id: 'molten_leggings', count: 1 };
+    this.armor.head = { id: 'silver_helmet', count: 1 };
+    this.armor.chest = { id: 'silver_chainmail', count: 1 };
+    this.armor.legs = { id: 'silver_greaves', count: 1 };
 
     this.accessories[0] = { id: 'cosmic_car_key', count: 1 };
     this.accessories[1] = { id: 'hermes_boots', count: 1 };
-    this.accessories[2] = { id: 'cobalt_shield', count: 1 };
-    this.accessories[3] = { id: 'cloud_in_a_bottle', count: 1 };
-    this.accessories[4] = { id: 'band_of_regeneration', count: 1 };
+    this.accessories[2] = { id: 'cloud_in_a_bottle', count: 1 };
+    this.accessories[3] = { id: 'band_of_regeneration', count: 1 };
+    this.accessories[4] = { id: 'grappling_hook', count: 1 };
   }
 
   upgradeForBossRushWave(wave: number): string | null {
     // Auto-upgrade player arsenal at key Boss Rush milestones
+    if (wave === 3) {
+      // Entering Eater of Worlds & Queen Bee
+      this.inventory[0] = { id: 'blade_of_grass', count: 1 };
+      this.inventory[1] = { id: 'bees_knees', count: 1 };
+      this.inventory[2] = { id: 'water_bolt', count: 1 };
+      this.armor.head = { id: 'shadow_helmet', count: 1 };
+      this.armor.chest = { id: 'shadow_scalemail', count: 1 };
+      this.armor.legs = { id: 'shadow_greaves', count: 1 };
+      this.maxHp = 340;
+      this.hp = 340;
+      this.maxMana = 180;
+      this.mana = 180;
+      return 'Wave 3 Tier Unlocked: Blade of Grass, The Bee’s Knees, Water Bolt & Shadow Armor!';
+    }
+    if (wave === 5) {
+      // Entering Skeletron & Wall of Flesh
+      this.inventory[0] = { id: 'nights_edge', count: 1 };
+      this.inventory[1] = { id: 'molten_fury', count: 1 };
+      this.inventory[2] = { id: 'demon_scythe', count: 1 };
+      this.inventory[3] = { id: 'minishark', count: 1 };
+      this.armor.head = { id: 'molten_helmet', count: 1 };
+      this.armor.chest = { id: 'molten_breastplate', count: 1 };
+      this.armor.legs = { id: 'molten_leggings', count: 1 };
+      this.accessories[2] = { id: 'cobalt_shield', count: 1 };
+      this.maxHp = 400;
+      this.hp = 400;
+      this.maxMana = 200;
+      this.mana = 200;
+      return 'Wave 5 Tier Unlocked: Night’s Edge, Molten Fury, Demon Scythe & Molten Armor!';
+    }
     if (wave === 7) {
-      // Entering Hardmode (The Twins)
+      // Entering Hardmode (The Twins, Destroyer, Skeletron Prime)
       this.inventory[0] = { id: 'excalibur', count: 1 };
       this.inventory[1] = { id: 'daedalus_stormbow', count: 1 };
       this.inventory[2] = { id: 'crystal_storm', count: 1 };

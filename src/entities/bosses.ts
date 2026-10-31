@@ -929,37 +929,37 @@ export class BossManager {
     // Update AI per boss type
     switch (b.type) {
       case 'king_slime':
-        this.updateKingSlime(b, dt, world, player, enemies, audio, particles);
+        this.updateKingSlime(b, dt, world, player, projectiles, enemies, audio, particles);
         break;
       case 'eye_of_cthulhu':
-        this.updateEyeOfCthulhu(b, dt, player, enemies, audio, particles);
+        this.updateEyeOfCthulhu(b, dt, player, projectiles, enemies, audio, particles);
         break;
       case 'eater_of_worlds':
-        this.updateEaterOfWorlds(b, dt, player);
+        this.updateEaterOfWorlds(b, dt, player, projectiles, audio, particles);
         break;
       case 'queen_bee':
-        this.updateQueenBee(b, dt, player, projectiles, enemies, audio);
+        this.updateQueenBee(b, dt, player, projectiles, enemies, audio, particles);
         break;
       case 'skeletron':
-        this.updateSkeletron(b, dt, player, audio);
+        this.updateSkeletron(b, dt, player, projectiles, audio, particles);
         break;
       case 'wall_of_flesh':
-        this.updateWallOfFlesh(b, dt, player, projectiles);
+        this.updateWallOfFlesh(b, dt, player, projectiles, audio, particles);
         break;
       case 'the_twins':
-        this.updateTheTwins(b, dt, player, projectiles, audio);
+        this.updateTheTwins(b, dt, player, projectiles, audio, particles);
         break;
       case 'the_destroyer':
-        this.updateTheDestroyer(b, dt, player, projectiles);
+        this.updateTheDestroyer(b, dt, player, projectiles, audio, particles);
         break;
       case 'skeletron_prime':
-        this.updateSkeletronPrime(b, dt, player, projectiles, audio);
+        this.updateSkeletronPrime(b, dt, player, projectiles, audio, particles);
         break;
       case 'plantera':
-        this.updatePlantera(b, dt, player, projectiles, audio);
+        this.updatePlantera(b, dt, player, projectiles, audio, particles);
         break;
       case 'golem':
-        this.updateGolem(b, dt, world, player, projectiles, audio);
+        this.updateGolem(b, dt, world, player, projectiles, audio, particles);
         break;
       case 'duke_fishron':
         this.updateDukeFishron(b, dt, player, projectiles, audio, particles);
@@ -968,7 +968,7 @@ export class BossManager {
         this.updateLunaticCultist(b, dt, player, projectiles, audio, particles);
         break;
       case 'moon_lord':
-        this.updateMoonLord(b, dt, player, projectiles, audio);
+        this.updateMoonLord(b, dt, player, projectiles, audio, particles);
         break;
     }
 
@@ -1046,14 +1046,14 @@ export class BossManager {
             p.hitIds.add(part.id);
             p.pierce--;
             this.damagePart(b, part, p.damage, world, audio, particles, projectiles);
-            if (p.type === 'holy_arrow') {
+            if (p.type === 'holy_arrow' && Math.random() < 0.45) {
               projectiles.spawn({
                 x: part.x + (Math.random() - 0.5) * 90,
                 y: part.y - 260,
                 vx: 0,
                 vy: 560,
                 type: 'falling_star',
-                damage: Math.round(p.damage * 0.75),
+                damage: Math.round(p.damage * 0.55),
                 friendly: true
               });
             }
@@ -1297,7 +1297,7 @@ export class BossManager {
   }
 
   // =========================================================
-  // INDIVIDUAL BOSS AI BEHAVIORS
+  // INDIVIDUAL BOSS AI BEHAVIORS (MULTI-ATTACK EDITION)
   // =========================================================
 
   private updateKingSlime(
@@ -1305,6 +1305,7 @@ export class BossManager {
     dt: number,
     world: World,
     player: Player,
+    projectiles: ProjectileManager,
     enemies: EnemyManager,
     audio: AudioManager,
     particles: ParticleSystem
@@ -1315,45 +1316,89 @@ export class BossManager {
     const hpRatio = clamp(p.hp / p.maxHp, 0.35, 1);
     p.radius = Math.round(24 + hpRatio * 22);
 
-    p.vy = Math.min(480, p.vy + 780 * dt);
+    const wasFallingFast = p.vy > 320;
+    p.vy = Math.min(540, p.vy + 780 * dt);
     const footTy = Math.floor((p.y + p.radius) / 16);
     const tx = Math.floor(p.x / 16);
     const grounded = p.vy >= 0 && world.isSolid(tx, footTy);
 
     if (grounded) {
       p.y = footTy * 16 - p.radius;
+      // Attack 1: Royal Slam Impact Shockwave + 8-Way Gel Spike Burst!
+      if (wasFallingFast) {
+        particles.spawnShockwave(p.x, p.y, '#2b82ff', 140, 0.35, 5);
+        particles.triggerShake(6, 0.2);
+        const count = hpRatio < 0.6 ? 8 : 5;
+        for (let k = 0; k < count; k++) {
+          const ang = -Math.PI + (k / (count - 1)) * Math.PI;
+          projectiles.spawn({
+            x: p.x,
+            y: p.y - 8,
+            vx: Math.cos(ang) * 320,
+            vy: Math.sin(ang) * 320 - 60,
+            type: 'water_bolt',
+            damage: 20,
+            friendly: false
+          });
+        }
+      }
       p.vy = 0;
       p.vx *= 0.8;
 
-      if (b.subTimer >= 1.15) {
+      if (b.subTimer >= 1.05 * hpRatio + 0.3) {
         b.subTimer = 0;
         b.chargeCount++;
         const dir = Math.sign(player.x - p.x) || 1;
         if (b.chargeCount % 4 === 0) {
-          // Mega slam jump
-          p.vy = -490;
-          p.vx = dir * 240;
+          // Attack 2: Mega Sky-Slam Jump + Aimed Crown Ruby Volley
+          p.vy = -520;
+          p.vx = dir * 270;
           audio.play('roar');
+          const aim = Math.atan2(player.y - p.y, player.x - p.x);
+          for (let s = -1; s <= 1; s++) {
+            projectiles.spawn({
+              x: p.x,
+              y: p.y - p.radius,
+              vx: Math.cos(aim + s * 0.22) * 360,
+              vy: Math.sin(aim + s * 0.22) * 360,
+              type: 'eye_laser',
+              damage: 22,
+              friendly: false
+            });
+          }
         } else {
-          p.vy = -340;
-          p.vx = dir * 185;
+          p.vy = -350;
+          p.vx = dir * 205;
           audio.play('jump');
         }
 
-        if (enemies.enemies.length < 6 && Math.random() < 0.45) {
+        if (enemies.enemies.length < 5 && Math.random() < 0.4) {
           enemies.spawnEnemy('blue_slime', p.x, p.y);
         }
       }
     }
 
-    // Teleport if too far or every 9 seconds
-    if (b.timer > 8.5 || dist(p.x, p.y, player.x, player.y) > 650) {
+    // Attack 3: Royal Teleport Ambush above player + Radial Slime Nova
+    if (b.timer > 7.2 || dist(p.x, p.y, player.x, player.y) > 650) {
       b.timer = 0;
+      particles.spawnShockwave(p.x, p.y, '#2b82ff', 120, 0.3, 4);
       particles.spawn(p.x, p.y, '#2b82ff', 22, 160, 4);
-      p.x = player.x + (Math.random() < 0.5 ? -140 : 140);
-      p.y = player.y - 160;
-      p.vy = 0;
-      particles.spawn(p.x, p.y, '#2b82ff', 22, 160, 4);
+      p.x = player.x + (Math.random() < 0.5 ? -90 : 90);
+      p.y = player.y - 190;
+      p.vy = 360;
+      particles.spawn(p.x, p.y, '#ffd747', 24, 170, 4, 0, true);
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(a) * 280,
+          vy: Math.sin(a) * 280,
+          type: 'water_bolt',
+          damage: 20,
+          friendly: false
+        });
+      }
     }
 
     p.x += p.vx * dt;
@@ -1364,6 +1409,7 @@ export class BossManager {
     b: BossInstance,
     dt: number,
     player: Player,
+    projectiles: ProjectileManager,
     enemies: EnemyManager,
     audio: AudioManager,
     particles: ParticleSystem
@@ -1371,37 +1417,75 @@ export class BossManager {
     const p = b.parts[0];
     if (!p) return;
 
-    if (b.phase === 1 && p.hp <= p.maxHp * 0.5) {
+    if (b.phase === 1 && p.hp <= p.maxHp * 0.55) {
       b.phase = 2;
       b.subTimer = 0;
       p.defense = 4;
       p.contactDamage = 34;
       audio.play('roar');
-      particles.spawn(p.x, p.y, '#d92b3a', 30, 180, 4);
+      particles.spawnShockwave(p.x, p.y, '#ff2942', 190, 0.45, 6);
+      particles.triggerShake(10, 0.35);
+      particles.spawn(p.x, p.y, '#d92b3a', 35, 200, 4.5, 0, true);
     }
 
-    const cycle = b.phase === 1 ? 5.5 : 3.8;
+    const cycle = b.phase === 1 ? 5.6 : 4.2;
     const t = b.subTimer % cycle;
 
-    if (t < cycle * 0.52) {
-      // Hover above player
-      const tx = player.x + Math.cos(b.timer * 2) * 140;
-      const ty = player.y - 150 + Math.sin(b.timer * 3) * 35;
+    if (t < cycle * 0.5) {
+      // Hover above player & fire Optic Blood Fans
+      const tx = player.x + Math.cos(b.timer * 2.2) * 150;
+      const ty = player.y - 155 + Math.sin(b.timer * 3.2) * 35;
       p.vx += ((tx - p.x) * 3.5 - p.vx) * dt * 4;
       p.vy += ((ty - p.y) * 3.5 - p.vy) * dt * 4;
 
-      if (b.phase === 1 && Math.random() < dt * 0.6 && enemies.enemies.length < 5) {
+      const shotInt = b.phase === 1 ? 1.1 : 0.65;
+      if (Math.floor((b.subTimer - dt) / shotInt) !== Math.floor(b.subTimer / shotInt)) {
+        const aim = Math.atan2(player.y - p.y, player.x - p.x);
+        const count = b.phase === 1 ? 2 : 3;
+        for (let i = 0; i < count; i++) {
+          const off = (i - (count - 1) * 0.5) * 0.22;
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(aim + off) * 350,
+            vy: Math.sin(aim + off) * 350,
+            type: 'eye_laser',
+            damage: b.phase === 1 ? 20 : 26,
+            friendly: false
+          });
+        }
+      }
+
+      if (b.phase === 1 && Math.random() < dt * 0.5 && enemies.enemies.length < 4) {
         enemies.spawnEnemy('demon_eye', p.x, p.y);
       }
     } else {
-      // Chain charges!
-      const chargeInterval = b.phase === 1 ? 0.85 : 0.52;
+      // Chain charges + Phase 2 Crimson Ring Burst!
+      const chargeInterval = b.phase === 1 ? 0.8 : 0.48;
       if (Math.floor((b.subTimer - dt) / chargeInterval) !== Math.floor(b.subTimer / chargeInterval)) {
+        b.chargeCount++;
         const angle = Math.atan2(player.y - p.y, player.x - p.x);
-        const spd = b.phase === 1 ? 370 : 490;
+        const spd = b.phase === 1 ? 390 : 520;
         p.vx = Math.cos(angle) * spd;
         p.vy = Math.sin(angle) * spd;
-        if (b.phase === 2) audio.play('roar');
+        if (b.phase === 2) {
+          audio.play('roar');
+          particles.spawnShockwave(p.x, p.y, '#ff2942', 85, 0.22, 3);
+          if (b.chargeCount % 3 === 0) {
+            for (let k = 0; k < 6; k++) {
+              const a = (k / 6) * Math.PI * 2;
+              projectiles.spawn({
+                x: p.x,
+                y: p.y,
+                vx: Math.cos(a) * 300,
+                vy: Math.sin(a) * 300,
+                type: 'eye_laser',
+                damage: 24,
+                friendly: false
+              });
+            }
+          }
+        }
       }
       p.vx *= 0.985;
       p.vy *= 0.985;
@@ -1411,19 +1495,28 @@ export class BossManager {
     p.y += p.vy * dt;
   }
 
-  private updateEaterOfWorlds(b: BossInstance, dt: number, player: Player): void {
+  private updateEaterOfWorlds(
+    b: BossInstance,
+    dt: number,
+    player: Player,
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem
+  ): void {
     const segDist = 22;
     for (let i = 0; i < b.parts.length; i++) {
       const seg = b.parts[i];
       if (seg.hp <= 0) continue;
 
       if (seg.parentIndex === undefined || seg.parentIndex < 0 || b.parts[seg.parentIndex]?.hp <= 0) {
-        // Head steering toward player in sine wave arcs
+        // Head steering toward player in sine wave arcs + periodic toxic lunge
+        const isLunging = (b.subTimer % 5.0) > 3.8;
         const desiredAngle =
-          Math.atan2(player.y - seg.y, player.x - seg.x) + Math.sin(b.timer * 3 + i) * 0.35;
-        const spd = 235;
-        seg.vx += (Math.cos(desiredAngle) * spd - seg.vx) * Math.min(1, dt * 3.2);
-        seg.vy += (Math.sin(desiredAngle) * spd - seg.vy) * Math.min(1, dt * 3.2);
+          Math.atan2(player.y - seg.y, player.x - seg.x) +
+          (isLunging ? 0 : Math.sin(b.timer * 3 + i) * 0.4);
+        const spd = isLunging ? 340 : 240;
+        seg.vx += (Math.cos(desiredAngle) * spd - seg.vx) * Math.min(1, dt * 3.6);
+        seg.vy += (Math.sin(desiredAngle) * spd - seg.vy) * Math.min(1, dt * 3.6);
         seg.x += seg.vx * dt;
         seg.y += seg.vy * dt;
       } else {
@@ -1438,6 +1531,46 @@ export class BossManager {
         }
       }
     }
+
+    // Attack 2: Body segments spit Vile Cursed Orbs at player
+    const spitInt = 0.75;
+    if (Math.floor((b.subTimer - dt) / spitInt) !== Math.floor(b.subTimer / spitInt)) {
+      const aliveSegs = b.parts.filter((s) => s.hp > 0);
+      if (aliveSegs.length > 0) {
+        const shooter = aliveSegs[Math.floor(Math.random() * aliveSegs.length)];
+        const aim = Math.atan2(player.y - shooter.y, player.x - shooter.x);
+        projectiles.spawn({
+          x: shooter.x,
+          y: shooter.y,
+          vx: Math.cos(aim) * 310,
+          vy: Math.sin(aim) * 310,
+          type: 'cursed_flame',
+          damage: 24,
+          friendly: false
+        });
+      }
+    }
+
+    // Attack 3: Head 5-way Corruption Fan Burst every 4.5s
+    if (Math.floor((b.subTimer - dt) / 4.5) !== Math.floor(b.subTimer / 4.5)) {
+      const head = b.parts.find((s) => s.hp > 0);
+      if (head) {
+        audio.play('roar');
+        particles.spawnShockwave(head.x, head.y, '#9ccf46', 110, 0.3, 4);
+        const aim = Math.atan2(player.y - head.y, player.x - head.x);
+        for (let k = -2; k <= 2; k++) {
+          projectiles.spawn({
+            x: head.x,
+            y: head.y,
+            vx: Math.cos(aim + k * 0.2) * 340,
+            vy: Math.sin(aim + k * 0.2) * 340,
+            type: 'cursed_flame',
+            damage: 26,
+            friendly: false
+          });
+        }
+      }
+    }
   }
 
   private updateQueenBee(
@@ -1446,46 +1579,85 @@ export class BossManager {
     player: Player,
     projectiles: ProjectileManager,
     enemies: EnemyManager,
-    audio: AudioManager
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     const p = b.parts[0];
     if (!p) return;
 
-    const cycle = 7.0;
+    const hpRatio = clamp(p.hp / p.maxHp, 0.2, 1);
+    const cycle = 8.5;
     const t = b.subTimer % cycle;
 
     if (t < 3.4) {
-      // Horizontal dash charges aligned with player Y
-      const interval = 0.85;
+      // Attack 1: High-speed Horizontal Stinger Dashes + Perpendicular Stinger Drop
+      const interval = 0.65 + hpRatio * 0.25;
       if (Math.floor((b.subTimer - dt) / interval) !== Math.floor(b.subTimer / interval)) {
         const dir = player.x >= p.x ? 1 : -1;
         p.y = player.y + (Math.random() - 0.5) * 24;
-        p.vx = dir * 480;
+        p.vx = dir * (500 + (1 - hpRatio) * 120);
         p.vy = 0;
         audio.play('swing');
+        particles.spawnShockwave(p.x, p.y, '#ffd747', 95, 0.25, 3);
       }
-      p.vx *= 0.985;
-    } else {
-      // Hover above and rain stingers
-      const tx = player.x + Math.sin(b.timer * 3.2) * 150;
-      const ty = player.y - 145;
-      p.vx += ((tx - p.x) * 4 - p.vx) * dt * 5;
-      p.vy += ((ty - p.y) * 4 - p.vy) * dt * 5;
-
-      const shootInt = 0.5;
-      if (Math.floor((b.subTimer - dt) / shootInt) !== Math.floor(b.subTimer / shootInt)) {
-        const angle = Math.atan2(player.y - p.y, player.x - p.x);
+      if (Math.abs(p.vx) > 260 && Math.random() < dt * 7) {
         projectiles.spawn({
           x: p.x,
           y: p.y,
-          vx: Math.cos(angle) * 340,
-          vy: Math.sin(angle) * 340,
+          vx: 0,
+          vy: player.y >= p.y ? 290 : -290,
           type: 'stinger',
           damage: 24,
           friendly: false
         });
-        if (enemies.enemies.length < 4 && Math.random() < 0.3) {
+      }
+      p.vx *= 0.985;
+    } else if (t < 6.4) {
+      // Attack 2: Hover above & fire 3-way Fan Stinger Volleys
+      const tx = player.x + Math.sin(b.timer * 3.4) * 160;
+      const ty = player.y - 150;
+      p.vx += ((tx - p.x) * 4 - p.vx) * dt * 5;
+      p.vy += ((ty - p.y) * 4 - p.vy) * dt * 5;
+
+      const shootInt = 0.52;
+      if (Math.floor((b.subTimer - dt) / shootInt) !== Math.floor(b.subTimer / shootInt)) {
+        const angle = Math.atan2(player.y - p.y, player.x - p.x);
+        for (let k = -1; k <= 1; k++) {
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(angle + k * 0.18) * 360,
+            vy: Math.sin(angle + k * 0.18) * 360,
+            type: 'stinger',
+            damage: 25,
+            friendly: false
+          });
+        }
+        if (enemies.enemies.length < 3 && Math.random() < 0.25) {
           enemies.spawnEnemy('hornet', p.x, p.y);
+        }
+      }
+    } else {
+      // Attack 3: Royal Hive 360° Spiral Stinger Barrage!
+      const tx = player.x;
+      const ty = player.y - 130;
+      p.vx += ((tx - p.x) * 4 - p.vx) * dt * 5;
+      p.vy += ((ty - p.y) * 4 - p.vy) * dt * 5;
+
+      const spiralInt = 0.16;
+      if (Math.floor((b.subTimer - dt) / spiralInt) !== Math.floor(b.subTimer / spiralInt)) {
+        const a = b.timer * 7.5;
+        for (let arm = 0; arm < 2; arm++) {
+          const ang = a + arm * Math.PI;
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(ang) * 330,
+            vy: Math.sin(ang) * 330,
+            type: 'stinger',
+            damage: 24,
+            friendly: false
+          });
         }
       }
     }
@@ -1494,43 +1666,86 @@ export class BossManager {
     p.y += p.vy * dt;
   }
 
-  private updateSkeletron(b: BossInstance, dt: number, player: Player, audio: AudioManager): void {
+  private updateSkeletron(
+    b: BossInstance,
+    dt: number,
+    player: Player,
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem
+  ): void {
     const head = b.parts.find((p) => p.role === 'head');
     if (!head) return;
 
     const cycle = 7.5;
     const t = b.subTimer % cycle;
-    const spinning = t > 4.5;
+    const spinning = t > 4.4;
     b.phase = spinning ? 2 : 1;
 
     if (!spinning) {
-      const tx = player.x + Math.sin(b.timer * 1.8) * 60;
-      const ty = player.y - 140;
+      const tx = player.x + Math.sin(b.timer * 1.8) * 70;
+      const ty = player.y - 145;
       head.vx += ((tx - head.x) * 3.5 - head.vx) * dt * 4;
       head.vy += ((ty - head.y) * 3.5 - head.vy) * dt * 4;
+
+      // Attack 1: Cast Homing Cursed Skull Fireballs in Phase 1
+      const skullInt = 1.15;
+      if (Math.floor((b.subTimer - dt) / skullInt) !== Math.floor(b.subTimer / skullInt)) {
+        const aim = Math.atan2(player.y - head.y, player.x - head.x);
+        for (let k = -1; k <= 1; k += 2) {
+          projectiles.spawn({
+            x: head.x,
+            y: head.y,
+            vx: Math.cos(aim + k * 0.25) * 320,
+            vy: Math.sin(aim + k * 0.25) * 320,
+            type: 'cultist_fire',
+            damage: 28,
+            friendly: false
+          });
+        }
+      }
     } else {
+      // Attack 2: Spinning Skull Pursuit + 4-Way Rotating Bone/Shadow Spiral!
       if (Math.floor((b.subTimer - dt) / cycle) !== Math.floor(b.subTimer / cycle)) {
         audio.play('roar');
+        particles.spawnShockwave(head.x, head.y, '#ded8c3', 140, 0.35, 5);
       }
       const angle = Math.atan2(player.y - head.y, player.x - head.x);
-      head.vx = Math.cos(angle) * 245;
-      head.vy = Math.sin(angle) * 245;
+      head.vx = Math.cos(angle) * 265;
+      head.vy = Math.sin(angle) * 265;
+
+      const spinShotInt = 0.32;
+      if (Math.floor((b.subTimer - dt) / spinShotInt) !== Math.floor(b.subTimer / spinShotInt)) {
+        for (let arm = 0; arm < 4; arm++) {
+          const a = b.timer * 5 + (arm * Math.PI) / 2;
+          projectiles.spawn({
+            x: head.x,
+            y: head.y,
+            vx: Math.cos(a) * 310,
+            vy: Math.sin(a) * 310,
+            type: 'eye_laser',
+            damage: 26,
+            friendly: false
+          });
+        }
+      }
     }
 
     head.x += head.vx * dt;
     head.y += head.vy * dt;
 
-    // Hands swipe at player
+    // Attack 3: Hands perform alternating high-speed cross-swipes & slams
     for (const part of b.parts) {
       if (part.role === 'left_hand' || part.role === 'right_hand') {
         if (part.hp <= 0) continue;
         part.aiTimer = (part.aiTimer || 0) + dt;
         const side = part.role === 'left_hand' ? -1 : 1;
-        const swipe = Math.sin(part.aiTimer * 3.2) > 0.65;
-        const tx = swipe ? player.x : head.x + side * 95;
+        const phaseOffset = part.role === 'left_hand' ? 0 : Math.PI;
+        const swipe = Math.sin(part.aiTimer * 3.4 + phaseOffset) > 0.55;
+        const tx = swipe ? player.x - side * 30 : head.x + side * 95;
         const ty = swipe ? player.y : head.y + 35 + Math.cos(part.aiTimer * 2.5) * 25;
-        part.vx += ((tx - part.x) * 5 - part.vx) * dt * 5;
-        part.vy += ((ty - part.y) * 5 - part.vy) * dt * 5;
+        part.vx += ((tx - part.x) * 6 - part.vx) * dt * 6;
+        part.vy += ((ty - part.y) * 6 - part.vy) * dt * 6;
         part.x += part.vx * dt;
         part.y += part.vy * dt;
       }
@@ -1541,7 +1756,9 @@ export class BossManager {
     b: BossInstance,
     dt: number,
     player: Player,
-    projectiles: ProjectileManager
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     const mouth = b.parts.find((p) => p.role === 'mouth');
     if (!mouth) return;
@@ -1549,7 +1766,6 @@ export class BossManager {
     const hpRatio = clamp(mouth.hp / mouth.maxHp, 0.1, 1);
     const sweepSpeed = 62 + (1 - hpRatio) * 65;
 
-    // Keep advancing toward player from the left (or catch up if far behind)
     if (player.x - b.x > 480) {
       b.x = player.x - 480;
     }
@@ -1569,30 +1785,72 @@ export class BossManager {
         part.y = b.y + 85;
       } else if (part.role === 'hungry') {
         part.aiTimer = (part.aiTimer || 0) + dt;
-        const tx = b.x + 105 + Math.sin(part.aiTimer * 3.5) * 45;
-        const ty = b.y + Math.cos(part.aiTimer * 2.2) * 85;
-        part.x += (tx - part.x) * dt * 5;
-        part.y += (ty - part.y) * dt * 5;
+        const lunge = Math.sin(part.aiTimer * 2.8) > 0.6;
+        const tx = lunge ? player.x : b.x + 105 + Math.sin(part.aiTimer * 3.5) * 45;
+        const ty = lunge ? player.y : b.y + Math.cos(part.aiTimer * 2.2) * 85;
+        part.x += (tx - part.x) * dt * 5.5;
+        part.y += (ty - part.y) * dt * 5.5;
       }
     }
 
-    // Eye Laser Barrages
-    const laserInterval = 0.65 + hpRatio * 0.75;
+    // Attack 1: Eye Laser Spreads from Top & Bottom Eyes
+    const laserInterval = 0.55 + hpRatio * 0.65;
     if (Math.floor((b.subTimer - dt) / laserInterval) !== Math.floor(b.subTimer / laserInterval)) {
+      b.chargeCount++;
       for (const part of b.parts) {
         if ((part.role === 'top_eye' || part.role === 'bottom_eye') && part.hp > 0) {
           const angle = Math.atan2(player.y - part.y, player.x - part.x);
-          projectiles.spawn({
-            x: part.x,
-            y: part.y,
-            vx: Math.cos(angle) * 410,
-            vy: Math.sin(angle) * 410,
-            type: 'eye_laser',
-            damage: 28,
-            friendly: false
-          });
+          const fan = b.chargeCount % 3 === 0 ? [-0.2, 0, 0.2] : [0];
+          for (const off of fan) {
+            projectiles.spawn({
+              x: part.x,
+              y: part.y,
+              vx: Math.cos(angle + off) * 420,
+              vy: Math.sin(angle + off) * 420,
+              type: 'eye_laser',
+              damage: 28,
+              friendly: false
+            });
+          }
         }
       }
+    }
+
+    // Attack 2: Mouth belches Hellfire Fireballs & Bouncing Magma Spheres
+    const fireInt = 1.8;
+    if (Math.floor((b.subTimer - dt) / fireInt) !== Math.floor(b.subTimer / fireInt)) {
+      const aim = Math.atan2(player.y - mouth.y, player.x - mouth.x);
+      for (let k = -1; k <= 1; k++) {
+        projectiles.spawn({
+          x: mouth.x,
+          y: mouth.y,
+          vx: Math.cos(aim + k * 0.24) * 360,
+          vy: Math.sin(aim + k * 0.24) * 360,
+          type: 'golem_fireball',
+          damage: 32,
+          friendly: false
+        });
+      }
+    }
+
+    // Attack 3: Sweeping Hellfire Deathray every 7.5s!
+    if (Math.floor((b.subTimer - dt) / 7.5) !== Math.floor(b.subTimer / 7.5)) {
+      const aim = Math.atan2(player.y - mouth.y, player.x - mouth.x);
+      b.deathray = {
+        active: true,
+        originX: mouth.x,
+        originY: mouth.y,
+        angle: aim - 0.5,
+        angularVel: 0.65,
+        timer: 1.5,
+        color: '#ff384c'
+      };
+      audio.play('laser');
+      particles.spawnShockwave(mouth.x, mouth.y, '#ff384c', 160, 0.35, 5);
+    }
+    if (b.deathray.active) {
+      b.deathray.originX = mouth.x;
+      b.deathray.originY = mouth.y;
     }
   }
 
@@ -1601,68 +1859,114 @@ export class BossManager {
     dt: number,
     player: Player,
     projectiles: ProjectileManager,
-    audio: AudioManager
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     for (const part of b.parts) {
       if (part.hp <= 0) continue;
       part.aiTimer = (part.aiTimer || 0) + dt;
 
-      if (part.phase === 1 && part.hp <= part.maxHp * 0.5) {
+      if (part.phase === 1 && part.hp <= part.maxHp * 0.55) {
         part.phase = 2;
         part.defense += 8;
         audio.play('roar');
+        particles.spawnShockwave(part.x, part.y, part.role === 'retinazer' ? '#ff2942' : '#78ff38', 180, 0.4, 6);
+        particles.triggerShake(10, 0.3);
       }
 
       if (part.role === 'retinazer') {
-        const tx = player.x - 190 * Math.sign(player.x - part.x || 1);
-        const ty = player.y - 130 + Math.sin(part.aiTimer * 2.5) * 45;
+        const tx = player.x - 195 * Math.sign(player.x - part.x || 1);
+        const ty = player.y - 135 + Math.sin(part.aiTimer * 2.5) * 50;
         part.vx += ((tx - part.x) * 4 - part.vx) * dt * 4;
         part.vy += ((ty - part.y) * 4 - part.vy) * dt * 4;
         part.x += part.vx * dt;
         part.y += part.vy * dt;
 
-        const fireInt = part.phase === 1 ? 0.95 : 0.38;
+        // Retinazer Attack 1: Rapid Death Lasers + 3-Way Laser Fan every 3rd burst
+        const fireInt = part.phase === 1 ? 0.85 : 0.34;
         if (Math.floor((part.aiTimer - dt) / fireInt) !== Math.floor(part.aiTimer / fireInt)) {
           const a = Math.atan2(player.y - part.y, player.x - part.x);
-          projectiles.spawn({
-            x: part.x,
-            y: part.y,
-            vx: Math.cos(a) * 480,
-            vy: Math.sin(a) * 480,
-            type: 'death_laser',
-            damage: part.phase === 1 ? 36 : 46,
-            friendly: false
-          });
-        }
-      } else if (part.role === 'spazmatism') {
-        const cycle = part.aiTimer % 5.0;
-        if (cycle < 2.8) {
-          // Hover & spit cursed flames
-          const tx = player.x + 170;
-          const ty = player.y - 30 + Math.cos(part.aiTimer * 3) * 55;
-          part.vx += ((tx - part.x) * 4 - part.vx) * dt * 4;
-          part.vy += ((ty - part.y) * 4 - part.vy) * dt * 4;
-
-          const flameInt = part.phase === 1 ? 0.75 : 0.25;
-          if (Math.floor((part.aiTimer - dt) / flameInt) !== Math.floor(part.aiTimer / flameInt)) {
-            const a = Math.atan2(player.y - part.y, player.x - part.x);
+          const spreadCount = part.phase === 2 && Math.floor(part.aiTimer / fireInt) % 3 === 0 ? 3 : 1;
+          for (let s = 0; s < spreadCount; s++) {
+            const off = (s - (spreadCount - 1) * 0.5) * 0.2;
             projectiles.spawn({
               x: part.x,
               y: part.y,
-              vx: Math.cos(a) * (part.phase === 1 ? 390 : 320),
-              vy: Math.sin(a) * (part.phase === 1 ? 390 : 320),
-              type: 'cursed_flame',
-              damage: 42,
+              vx: Math.cos(a + off) * 500,
+              vy: Math.sin(a + off) * 500,
+              type: 'death_laser',
+              damage: part.phase === 1 ? 36 : 44,
               friendly: false
             });
           }
+        }
+
+        // Retinazer Attack 2 (Phase 2): Sweeping Red Orbital Deathray every 6.5s
+        if (part.phase === 2 && Math.floor((part.aiTimer - dt) / 6.5) !== Math.floor(part.aiTimer / 6.5)) {
+          const a = Math.atan2(player.y - part.y, player.x - part.x);
+          b.deathray = {
+            active: true,
+            originX: part.x,
+            originY: part.y,
+            angle: a - 0.55,
+            angularVel: 0.75,
+            timer: 1.4,
+            color: '#ff2942'
+          };
+          audio.play('laser');
+        }
+        if (b.deathray.active) {
+          b.deathray.originX = part.x;
+          b.deathray.originY = part.y;
+        }
+      } else if (part.role === 'spazmatism') {
+        const cycle = part.aiTimer % 5.4;
+        if (cycle < 3.0) {
+          // Spazmatism Attack 1: Hover & Cursed Flamethrower Cone
+          const tx = player.x + 175;
+          const ty = player.y - 30 + Math.cos(part.aiTimer * 3) * 60;
+          part.vx += ((tx - part.x) * 4 - part.vx) * dt * 4;
+          part.vy += ((ty - part.y) * 4 - part.vy) * dt * 4;
+
+          const flameInt = part.phase === 1 ? 0.68 : 0.24;
+          if (Math.floor((part.aiTimer - dt) / flameInt) !== Math.floor(part.aiTimer / flameInt)) {
+            const a = Math.atan2(player.y - part.y, player.x - part.x);
+            const count = part.phase === 2 ? 2 : 1;
+            for (let c = 0; c < count; c++) {
+              const off = (Math.random() - 0.5) * (part.phase === 2 ? 0.28 : 0.08);
+              projectiles.spawn({
+                x: part.x,
+                y: part.y,
+                vx: Math.cos(a + off) * (part.phase === 1 ? 400 : 350),
+                vy: Math.sin(a + off) * (part.phase === 1 ? 400 : 350),
+                type: 'cursed_flame',
+                damage: 40,
+                friendly: false
+              });
+            }
+          }
         } else {
-          // Aggressive charge dashes
-          const dashInt = 0.65;
+          // Spazmatism Attack 2: Aggressive Berserk Dash Chain + Cursed Ring Nova
+          const dashInt = part.phase === 1 ? 0.65 : 0.45;
           if (Math.floor((part.aiTimer - dt) / dashInt) !== Math.floor(part.aiTimer / dashInt)) {
             const a = Math.atan2(player.y - part.y, player.x - part.x);
-            part.vx = Math.cos(a) * 520;
-            part.vy = Math.sin(a) * 520;
+            part.vx = Math.cos(a) * (part.phase === 1 ? 510 : 600);
+            part.vy = Math.sin(a) * (part.phase === 1 ? 510 : 600);
+            particles.spawnShockwave(part.x, part.y, '#78ff38', 90, 0.22, 3);
+            if (part.phase === 2) {
+              for (let k = 0; k < 6; k++) {
+                const ang = (k / 6) * Math.PI * 2;
+                projectiles.spawn({
+                  x: part.x,
+                  y: part.y,
+                  vx: Math.cos(ang) * 290,
+                  vy: Math.sin(ang) * 290,
+                  type: 'cursed_flame',
+                  damage: 38,
+                  friendly: false
+                });
+              }
+            }
           }
           part.vx *= 0.98;
           part.vy *= 0.98;
@@ -1677,17 +1981,20 @@ export class BossManager {
     b: BossInstance,
     dt: number,
     player: Player,
-    projectiles: ProjectileManager
+    projectiles: ProjectileManager,
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     const head = b.parts[0];
     if (!head) return;
 
-    const targetX = player.x + Math.cos(b.timer * 1.4) * 180;
-    const targetY = player.y + Math.sin(b.timer * 2.1) * 160;
+    const charging = (b.subTimer % 6.5) > 4.8;
+    const targetX = charging ? player.x : player.x + Math.cos(b.timer * 1.4) * 190;
+    const targetY = charging ? player.y : player.y + Math.sin(b.timer * 2.1) * 170;
     const desiredAngle = Math.atan2(targetY - head.y, targetX - head.x);
-    const spd = 330;
-    head.vx += (Math.cos(desiredAngle) * spd - head.vx) * Math.min(1, dt * 3.2);
-    head.vy += (Math.sin(desiredAngle) * spd - head.vy) * Math.min(1, dt * 3.2);
+    const spd = charging ? 450 : 330;
+    head.vx += (Math.cos(desiredAngle) * spd - head.vx) * Math.min(1, dt * (charging ? 5.0 : 3.2));
+    head.vy += (Math.sin(desiredAngle) * spd - head.vy) * Math.min(1, dt * (charging ? 5.0 : 3.2));
     head.x += head.vx * dt;
     head.y += head.vy * dt;
 
@@ -1702,19 +2009,51 @@ export class BossManager {
       seg.y = prev.y - (dy / d) * segDist;
     }
 
-    // Body segments fire red lasers periodically
-    const laserInt = 0.55;
+    // Attack 1: Body segments fire synchronized Red Probe Lasers
+    const laserInt = 0.45;
     if (Math.floor((b.subTimer - dt) / laserInt) !== Math.floor(b.subTimer / laserInt)) {
-      const randomSeg = b.parts[Math.floor(Math.random() * b.parts.length)];
-      if (randomSeg) {
-        const a = Math.atan2(player.y - randomSeg.y, player.x - randomSeg.x);
+      for (let s = 0; s < 2; s++) {
+        const randomSeg = b.parts[Math.floor(Math.random() * b.parts.length)];
+        if (randomSeg) {
+          const a = Math.atan2(player.y - randomSeg.y, player.x - randomSeg.x);
+          projectiles.spawn({
+            x: randomSeg.x,
+            y: randomSeg.y,
+            vx: Math.cos(a) * 390,
+            vy: Math.sin(a) * 390,
+            type: 'death_laser',
+            damage: 38,
+            friendly: false
+          });
+        }
+      }
+    }
+
+    // Attack 2: Head 8-Way Radial Laser Nova + Plasma Mine Drop every 4.2s
+    if (Math.floor((b.subTimer - dt) / 4.2) !== Math.floor(b.subTimer / 4.2)) {
+      audio.play('laser');
+      particles.spawnShockwave(head.x, head.y, '#ff2942', 140, 0.35, 5);
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2;
         projectiles.spawn({
-          x: randomSeg.x,
-          y: randomSeg.y,
-          vx: Math.cos(a) * 380,
-          vy: Math.sin(a) * 380,
+          x: head.x,
+          y: head.y,
+          vx: Math.cos(a) * 360,
+          vy: Math.sin(a) * 360,
           type: 'death_laser',
           damage: 38,
+          friendly: false
+        });
+      }
+      const tail = b.parts[b.parts.length - 1];
+      if (tail) {
+        projectiles.spawn({
+          x: tail.x,
+          y: tail.y,
+          vx: (Math.random() - 0.5) * 180,
+          vy: -160,
+          type: 'spiky_ball',
+          damage: 42,
           friendly: false
         });
       }
@@ -1726,26 +2065,44 @@ export class BossManager {
     dt: number,
     player: Player,
     projectiles: ProjectileManager,
-    audio: AudioManager
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     const head = b.parts.find((p) => p.role === 'head');
     if (!head) return;
 
-    const spinning = (b.subTimer % 8.0) > 5.0;
+    const spinning = (b.subTimer % 8.0) > 4.8;
     b.phase = spinning ? 2 : 1;
 
     if (!spinning) {
-      const tx = player.x + Math.sin(b.timer * 2) * 70;
+      const tx = player.x + Math.sin(b.timer * 2) * 75;
       const ty = player.y - 155;
       head.vx += ((tx - head.x) * 4 - head.vx) * dt * 4;
       head.vy += ((ty - head.y) * 4 - head.vy) * dt * 4;
     } else {
       if (Math.floor((b.subTimer - dt) / 8.0) !== Math.floor(b.subTimer / 8.0)) {
         audio.play('roar');
+        particles.spawnShockwave(head.x, head.y, '#ff2942', 165, 0.4, 5);
       }
       const a = Math.atan2(player.y - head.y, player.x - head.x);
-      head.vx = Math.cos(a) * 285;
-      head.vy = Math.sin(a) * 285;
+      head.vx = Math.cos(a) * 295;
+      head.vy = Math.sin(a) * 295;
+
+      // Head Spin Attack: 6-way Rotating Death Laser Ring!
+      if (Math.floor((b.subTimer - dt) / 0.45) !== Math.floor(b.subTimer / 0.45)) {
+        for (let k = 0; k < 6; k++) {
+          const ang = b.timer * 4 + (k * Math.PI * 2) / 6;
+          projectiles.spawn({
+            x: head.x,
+            y: head.y,
+            vx: Math.cos(ang) * 370,
+            vy: Math.sin(ang) * 370,
+            type: 'death_laser',
+            damage: 40,
+            friendly: false
+          });
+        }
+      }
     }
     head.x += head.vx * dt;
     head.y += head.vy * dt;
@@ -1759,44 +2116,48 @@ export class BossManager {
       if (part.role === 'prime_laser') {
         ox = -95;
         oy = -40;
-        if (Math.floor((part.aiTimer - dt) / 1.1) !== Math.floor(part.aiTimer / 1.1)) {
+        if (Math.floor((part.aiTimer - dt) / 0.95) !== Math.floor(part.aiTimer / 0.95)) {
           const a = Math.atan2(player.y - part.y, player.x - part.x);
-          projectiles.spawn({
-            x: part.x,
-            y: part.y,
-            vx: Math.cos(a) * 450,
-            vy: Math.sin(a) * 450,
-            type: 'death_laser',
-            damage: 42,
-            friendly: false
-          });
+          for (let s = -1; s <= 1; s++) {
+            projectiles.spawn({
+              x: part.x,
+              y: part.y,
+              vx: Math.cos(a + s * 0.16) * 460,
+              vy: Math.sin(a + s * 0.16) * 460,
+              type: 'death_laser',
+              damage: 42,
+              friendly: false
+            });
+          }
         }
       } else if (part.role === 'prime_cannon') {
         ox = 95;
         oy = -40;
-        if (Math.floor((part.aiTimer - dt) / 1.4) !== Math.floor(part.aiTimer / 1.4)) {
+        if (Math.floor((part.aiTimer - dt) / 1.25) !== Math.floor(part.aiTimer / 1.25)) {
           const a = Math.atan2(player.y - part.y, player.x - part.x);
-          projectiles.spawn({
-            x: part.x,
-            y: part.y,
-            vx: Math.cos(a) * 340,
-            vy: Math.sin(a) * 340 - 80,
-            type: 'spiky_ball',
-            damage: 46,
-            friendly: false
-          });
+          for (let g = -1; g <= 1; g += 2) {
+            projectiles.spawn({
+              x: part.x,
+              y: part.y,
+              vx: Math.cos(a + g * 0.2) * 350,
+              vy: Math.sin(a + g * 0.2) * 350 - 90,
+              type: 'spiky_ball',
+              damage: 46,
+              friendly: false
+            });
+          }
         }
       } else if (part.role === 'prime_saw' || part.role === 'prime_vice') {
         const side = part.role === 'prime_saw' ? -85 : 85;
-        const lunge = Math.sin(part.aiTimer * 3.4) > 0.6;
+        const lunge = Math.sin(part.aiTimer * 3.8 + (part.role === 'prime_saw' ? 0 : Math.PI)) > 0.5;
         ox = lunge ? player.x - head.x : side;
         oy = lunge ? player.y - head.y : 55;
       }
 
       const tx = head.x + ox;
       const ty = head.y + oy;
-      part.x += (tx - part.x) * dt * 6;
-      part.y += (ty - part.y) * dt * 6;
+      part.x += (tx - part.x) * dt * 6.5;
+      part.y += (ty - part.y) * dt * 6.5;
     }
   }
 
@@ -1805,44 +2166,71 @@ export class BossManager {
     dt: number,
     player: Player,
     projectiles: ProjectileManager,
-    audio: AudioManager
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     const p = b.parts[0];
     if (!p) return;
 
-    if (b.phase === 1 && p.hp <= p.maxHp * 0.5) {
+    if (b.phase === 1 && p.hp <= p.maxHp * 0.55) {
       b.phase = 2;
       p.defense = 14;
       p.contactDamage = 76;
       audio.play('roar');
+      particles.spawnShockwave(p.x, p.y, '#ff59b8', 210, 0.45, 7);
+      particles.triggerShake(12, 0.35);
     }
 
     const angle = Math.atan2(player.y - p.y, player.x - p.x);
-    const spd = b.phase === 1 ? 155 : 275;
-    p.vx += (Math.cos(angle) * spd - p.vx) * dt * 3.5;
-    p.vy += (Math.sin(angle) * spd - p.vy) * dt * 3.5;
+    const isLunging = b.phase === 2 && (b.subTimer % 3.6) > 2.6;
+    const spd = isLunging ? 420 : b.phase === 1 ? 165 : 280;
+    p.vx += (Math.cos(angle) * spd - p.vx) * dt * (isLunging ? 6 : 3.5);
+    p.vy += (Math.sin(angle) * spd - p.vy) * dt * (isLunging ? 6 : 3.5);
     p.x += p.vx * dt;
     p.y += p.vy * dt;
 
-    const shootInt = b.phase === 1 ? 0.55 : 0.85;
+    // Attack 1: Poison Seed Fan Volleys + Bouncing Thorn Balls
+    const shootInt = b.phase === 1 ? 0.52 : 0.42;
     if (Math.floor((b.subTimer - dt) / shootInt) !== Math.floor(b.subTimer / shootInt)) {
-      projectiles.spawn({
-        x: p.x,
-        y: p.y,
-        vx: Math.cos(angle) * 430,
-        vy: Math.sin(angle) * 430,
-        type: 'plantera_seed',
-        damage: 48,
-        friendly: false
-      });
-      if (Math.random() < 0.35) {
+      b.chargeCount++;
+      const count = b.chargeCount % 3 === 0 ? 3 : 1;
+      for (let i = 0; i < count; i++) {
+        const off = (i - (count - 1) * 0.5) * 0.22;
         projectiles.spawn({
           x: p.x,
           y: p.y,
-          vx: (Math.random() - 0.5) * 220,
-          vy: -140,
+          vx: Math.cos(angle + off) * 440,
+          vy: Math.sin(angle + off) * 440,
+          type: 'plantera_seed',
+          damage: 48,
+          friendly: false
+        });
+      }
+      if (b.chargeCount % 2 === 0) {
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(angle) * 280 + (Math.random() - 0.5) * 140,
+          vy: -180,
           type: 'spiky_ball',
           damage: 54,
+          friendly: false
+        });
+      }
+    }
+
+    // Attack 2: 8-Way Jungle Spore Ring Burst every 3.8s!
+    if (Math.floor((b.subTimer - dt) / 3.8) !== Math.floor(b.subTimer / 3.8)) {
+      particles.spawnShockwave(p.x, p.y, '#65d938', 130, 0.32, 4);
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2 + b.timer;
+        projectiles.spawn({
+          x: p.x,
+          y: p.y,
+          vx: Math.cos(a) * 330,
+          vy: Math.sin(a) * 330,
+          type: 'plantera_seed',
+          damage: 46,
           friendly: false
         });
       }
@@ -1855,69 +2243,92 @@ export class BossManager {
     world: World,
     player: Player,
     projectiles: ProjectileManager,
-    audio: AudioManager
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     const body = b.parts.find((p) => p.role === 'body');
     const head = b.parts.find((p) => p.role === 'head');
     if (!body) return;
 
-    // Ground physics for Golem body
-    body.vy = Math.min(480, body.vy + 780 * dt);
+    const wasFallingFast = body.vy > 300;
+    body.vy = Math.min(520, body.vy + 780 * dt);
     const footTy = Math.floor((body.y + body.radius) / 16);
     const tx = Math.floor(body.x / 16);
     if (body.vy >= 0 && world.isSolid(tx, footTy)) {
       body.y = footTy * 16 - body.radius;
+      // Attack 1: Earthquake Ground Slam + 6-Way Solar Fireball Eruption!
+      if (wasFallingFast) {
+        particles.spawnShockwave(body.x, body.y, '#ff8c1a', 190, 0.4, 6);
+        particles.triggerShake(10, 0.3);
+        for (let k = 0; k < 6; k++) {
+          const ang = -Math.PI + (k / 5) * Math.PI;
+          projectiles.spawn({
+            x: body.x,
+            y: body.y - 10,
+            vx: Math.cos(ang) * 380,
+            vy: Math.sin(ang) * 380,
+            type: 'golem_fireball',
+            damage: 54,
+            friendly: false
+          });
+        }
+      }
       body.vy = 0;
       body.vx *= 0.75;
-      if (b.subTimer >= 1.6) {
+      if (b.subTimer >= 1.45) {
         b.subTimer = 0;
-        body.vy = -390;
-        body.vx = Math.sign(player.x - body.x) * 230;
+        body.vy = -420;
+        body.vx = Math.sign(player.x - body.x) * 260;
         audio.play('explosion');
       }
     }
     body.x += body.vx * dt;
     body.y += body.vy * dt;
 
-    // Golem Head detaches when damaged below 30% or body < 50%
+    // Attack 2: Golem Head detaches when damaged & fires 3-Way Solar Laser Fans
     if (head) {
       head.aiTimer = (head.aiTimer || 0) + dt;
       if (head.hp <= 2500 || body.hp <= body.maxHp * 0.55) {
         head.invulnerable = true;
         b.phase = 2;
-        const htx = player.x + Math.cos(head.aiTimer * 2) * 140;
-        const hty = player.y - 150 + Math.sin(head.aiTimer * 3) * 40;
-        head.x += (htx - head.x) * dt * 4;
-        head.y += (hty - head.y) * dt * 4;
+        const htx = player.x + Math.cos(head.aiTimer * 2) * 150;
+        const hty = player.y - 155 + Math.sin(head.aiTimer * 3) * 40;
+        head.x += (htx - head.x) * dt * 4.5;
+        head.y += (hty - head.y) * dt * 4.5;
       } else {
         head.x = body.x;
         head.y = body.y - 44;
       }
 
-      if (Math.floor((head.aiTimer - dt) / 0.85) !== Math.floor(head.aiTimer / 0.85)) {
+      const beamInt = b.phase === 2 ? 0.65 : 0.85;
+      if (Math.floor((head.aiTimer - dt) / beamInt) !== Math.floor(head.aiTimer / beamInt)) {
         const a = Math.atan2(player.y - head.y, player.x - head.x);
-        projectiles.spawn({
-          x: head.x,
-          y: head.y,
-          vx: Math.cos(a) * 480,
-          vy: Math.sin(a) * 480,
-          type: b.phase === 2 ? 'golem_beam' : 'golem_fireball',
-          damage: 54,
-          friendly: false
-        });
+        const count = b.phase === 2 ? 3 : 2;
+        for (let c = 0; c < count; c++) {
+          const off = (c - (count - 1) * 0.5) * 0.2;
+          projectiles.spawn({
+            x: head.x,
+            y: head.y,
+            vx: Math.cos(a + off) * 490,
+            vy: Math.sin(a + off) * 490,
+            type: b.phase === 2 ? 'golem_beam' : 'golem_fireball',
+            damage: 54,
+            friendly: false
+          });
+        }
       }
     }
 
-    // Fists punch out on chains
+    // Attack 3: Fists punch out on chains + Phase 2 Sweeping Sun Beam
     for (const fist of b.parts) {
       if ((fist.role === 'left_fist' || fist.role === 'right_fist') && fist.hp > 0) {
         fist.aiTimer = (fist.aiTimer || 0) + dt;
         const side = fist.role === 'left_fist' ? -1 : 1;
-        const punching = Math.sin(fist.aiTimer * 4) > 0.55;
+        const punching = Math.sin(fist.aiTimer * 4.2 + (side < 0 ? 0 : Math.PI)) > 0.45;
         const ftx = punching ? player.x : body.x + side * 52;
         const fty = punching ? player.y : body.y;
-        fist.x += (ftx - fist.x) * dt * 9;
-        fist.y += (fty - fist.y) * dt * 9;
+        fist.x += (ftx - fist.x) * dt * 10;
+        fist.y += (fty - fist.y) * dt * 10;
       }
     }
   }
@@ -1933,39 +2344,64 @@ export class BossManager {
     const p = b.parts[0];
     if (!p) return;
 
-    if (b.phase === 1 && p.hp <= p.maxHp * 0.55) {
+    if (b.phase === 1 && p.hp <= p.maxHp * 0.6) {
       b.phase = 2;
       audio.play('roar');
-    } else if (b.phase === 2 && p.hp <= p.maxHp * 0.22) {
+      particles.spawnShockwave(p.x, p.y, '#1cb3ff', 200, 0.45, 6);
+      particles.triggerShake(10, 0.3);
+    } else if (b.phase === 2 && p.hp <= p.maxHp * 0.28) {
       b.phase = 3;
       audio.play('roar');
+      particles.spawnShockwave(p.x, p.y, '#00ffcc', 240, 0.5, 8);
+      particles.triggerFlash('#1cb3ff', 0.3);
     }
 
-    const dashInt = b.phase === 1 ? 0.72 : b.phase === 2 ? 0.56 : 0.44;
+    const dashInt = b.phase === 1 ? 0.68 : b.phase === 2 ? 0.52 : 0.4;
     if (Math.floor((b.subTimer - dt) / dashInt) !== Math.floor(b.subTimer / dashInt)) {
       b.chargeCount++;
-      if (b.phase === 3 && b.chargeCount % 4 === 0) {
-        // Phase 3 teleport behind player!
-        particles.spawn(p.x, p.y, '#1cb3ff', 25, 180, 4);
-        p.x = player.x - player.facing * 180;
-        p.y = player.y - 40;
-        particles.spawn(p.x, p.y, '#1cb3ff', 25, 180, 4);
+      if (b.phase === 3 && b.chargeCount % 3 === 0) {
+        // Phase 3 Attack: Teleport Ambush Behind Player + Oceanic Ring!
+        particles.spawnShockwave(p.x, p.y, '#1cb3ff', 140, 0.3, 4);
+        p.x = player.x - player.facing * 175;
+        p.y = player.y - 35;
+        particles.spawnShockwave(p.x, p.y, '#00ffcc', 140, 0.3, 4);
       }
 
       const a = Math.atan2(player.y - p.y, player.x - p.x);
-      const spd = b.phase === 1 ? 520 : b.phase === 2 ? 600 : 660;
+      const spd = b.phase === 1 ? 530 : b.phase === 2 ? 610 : 680;
       p.vx = Math.cos(a) * spd;
       p.vy = Math.sin(a) * spd;
 
-      if (b.chargeCount % 3 === 0) {
-        for (let k = -1; k <= 1; k++) {
+      // Attack 2: Detonating Bubble Fan on every 2nd dash
+      if (b.chargeCount % 2 === 0) {
+        const count = b.phase >= 2 ? 5 : 3;
+        for (let k = 0; k < count; k++) {
+          const off = (k - (count - 1) * 0.5) * 0.2;
           projectiles.spawn({
             x: p.x,
             y: p.y,
-            vx: Math.cos(a + k * 0.22) * 420,
-            vy: Math.sin(a + k * 0.22) * 420,
+            vx: Math.cos(a + off) * 440,
+            vy: Math.sin(a + off) * 440,
             type: 'sharknado_bolt',
-            damage: 62,
+            damage: 58,
+            friendly: false
+          });
+        }
+      }
+
+      // Attack 3: Cthulhunado 10-Bolt Vortex Nova every 5th dash!
+      if (b.chargeCount % 5 === 0) {
+        audio.play('magic');
+        particles.spawnShockwave(p.x, p.y, '#1cb3ff', 170, 0.4, 5);
+        for (let v = 0; v < 10; v++) {
+          const ang = (v / 10) * Math.PI * 2;
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(ang) * 390,
+            vy: Math.sin(ang) * 390,
+            type: 'sharknado_bolt',
+            damage: 60,
             friendly: false
           });
         }
@@ -1989,42 +2425,74 @@ export class BossManager {
     const p = b.parts[0];
     if (!p) return;
 
-    // Teleport to a new position around player every 2.6 seconds
-    const tpInt = 2.6;
+    // Teleport around player every 2.2 seconds and cycle through 4 Ancient Ritual Spells!
+    const tpInt = 2.2;
     if (Math.floor((b.subTimer - dt) / tpInt) !== Math.floor(b.subTimer / tpInt)) {
+      particles.spawnShockwave(p.x, p.y, '#ffd747', 110, 0.28, 4);
       particles.spawn(p.x, p.y, '#ffd747', 20, 140, 3.5, 0, true);
-      const angle = (Math.random() - 0.5) * Math.PI * 0.8 - Math.PI * 0.5;
+      const angle = (Math.random() - 0.5) * Math.PI * 0.9 - Math.PI * 0.5;
       p.x = player.x + Math.cos(angle) * 210;
-      p.y = player.y + Math.sin(angle) * 180;
+      p.y = player.y + Math.sin(angle) * 175;
+      particles.spawnShockwave(p.x, p.y, '#ffd747', 130, 0.32, 4);
       particles.spawn(p.x, p.y, '#ffd747', 20, 140, 3.5, 0, true);
       audio.play('magic');
 
       b.chargeCount++;
+      const spell = b.chargeCount % 4;
       const aim = Math.atan2(player.y - p.y, player.x - p.x);
-      if (b.chargeCount % 2 === 0) {
-        // Homing Fireball volley
-        for (let i = -1; i <= 1; i++) {
+
+      if (spell === 0) {
+        // Spell 1: 5-Orb Homing Fireball Barrage
+        for (let i = -2; i <= 2; i++) {
           projectiles.spawn({
             x: p.x,
             y: p.y,
-            vx: Math.cos(aim + i * 0.25) * 380,
-            vy: Math.sin(aim + i * 0.25) * 380,
+            vx: Math.cos(aim + i * 0.2) * 390,
+            vy: Math.sin(aim + i * 0.2) * 390,
             type: 'cultist_fire',
             damage: 58,
             friendly: false
           });
         }
-      } else {
-        // Radial Ice Mist burst
-        for (let i = 0; i < 6; i++) {
-          const a = (i / 6) * Math.PI * 2;
+      } else if (spell === 1) {
+        // Spell 2: 8-Way Rotating Ice Mist Nova
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2 + b.timer;
           projectiles.spawn({
             x: p.x,
             y: p.y,
-            vx: Math.cos(a) * 340,
-            vy: Math.sin(a) * 340,
+            vx: Math.cos(a) * 350,
+            vy: Math.sin(a) * 350,
             type: 'cultist_ice',
             damage: 56,
+            friendly: false
+          });
+        }
+      } else if (spell === 2) {
+        // Spell 3: Ancient Lightning Spear Volley
+        audio.play('laser');
+        for (let i = -2; i <= 2; i++) {
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(aim + i * 0.1) * 540,
+            vy: Math.sin(aim + i * 0.1) * 540,
+            type: 'golem_beam',
+            damage: 60,
+            friendly: false
+          });
+        }
+      } else {
+        // Spell 4: Ancient Starlight Ring + Sweeping Ritual Beam
+        for (let i = 0; i < 10; i++) {
+          const a = (i / 10) * Math.PI * 2;
+          projectiles.spawn({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(a) * 410,
+            vy: Math.sin(a) * 410,
+            type: 'phantasmal_bolt',
+            damage: 58,
             friendly: false
           });
         }
@@ -2037,7 +2505,8 @@ export class BossManager {
     dt: number,
     player: Player,
     projectiles: ProjectileManager,
-    audio: AudioManager
+    audio: AudioManager,
+    particles: ParticleSystem
   ): void {
     // Smoothly track player position
     b.x += (player.x - b.x) * dt * 2.2;
@@ -2071,29 +2540,55 @@ export class BossManager {
         core.invulnerable = false;
         b.phase = 2;
         audio.play('roar');
+        particles.spawnShockwave(core.x, core.y, '#3be8d1', 260, 0.55, 8);
+        particles.triggerFlash('#3be8d1', 0.35);
       }
     }
 
-    // Phantasmal Bolts & Spheres from Hands/Core
-    const boltInt = 1.15;
+    // Attack 1: Phantasmal Bolt Fans & Spheres from Hands/Core
+    const boltInt = 1.05;
     if (Math.floor((b.subTimer - dt) / boltInt) !== Math.floor(b.subTimer / boltInt)) {
+      b.chargeCount++;
       for (const eye of [leftHand, rightHand, headEye, core]) {
         if (!eye || eye.hp <= 0 || eye.invulnerable) continue;
         const a = Math.atan2(player.y - eye.y, player.x - eye.x);
-        projectiles.spawn({
-          x: eye.x,
-          y: eye.y,
-          vx: Math.cos(a) * 480,
-          vy: Math.sin(a) * 480,
-          type: eye.role === 'core' ? 'phantasmal_sphere' : 'phantasmal_bolt',
-          damage: 66,
-          friendly: false
-        });
+        const fan = b.chargeCount % 2 === 0 ? [-0.18, 0, 0.18] : [0];
+        for (const off of fan) {
+          projectiles.spawn({
+            x: eye.x,
+            y: eye.y,
+            vx: Math.cos(a + off) * 490,
+            vy: Math.sin(a + off) * 490,
+            type: eye.role === 'core' ? 'phantasmal_sphere' : 'phantasmal_bolt',
+            damage: 64,
+            friendly: false
+          });
+        }
       }
     }
 
-    // Sweeping Phantasmal Deathray every 7.5 seconds!
-    const rayCycle = 7.5;
+    // Attack 2: 12-Bolt Cosmic Phantasmal Ring Burst every 4.2 seconds!
+    if (Math.floor((b.subTimer - dt) / 4.2) !== Math.floor(b.subTimer / 4.2)) {
+      const origin = core && !core.invulnerable ? core : headEye;
+      if (origin) {
+        particles.spawnShockwave(origin.x, origin.y, '#3be8d1', 180, 0.4, 5);
+        for (let k = 0; k < 12; k++) {
+          const ang = (k / 12) * Math.PI * 2 + b.timer;
+          projectiles.spawn({
+            x: origin.x,
+            y: origin.y,
+            vx: Math.cos(ang) * 400,
+            vy: Math.sin(ang) * 400,
+            type: k % 2 === 0 ? 'phantasmal_sphere' : 'phantasmal_bolt',
+            damage: 64,
+            friendly: false
+          });
+        }
+      }
+    }
+
+    // Attack 3: Sweeping Phantasmal Deathray every 6.5 seconds!
+    const rayCycle = b.phase === 2 ? 5.2 : 6.5;
     if (Math.floor((b.subTimer - dt) / rayCycle) !== Math.floor(b.subTimer / rayCycle)) {
       const origin = headEye && headEye.hp > 0 ? headEye : core;
       if (origin) {
@@ -2103,8 +2598,8 @@ export class BossManager {
           originX: origin.x,
           originY: origin.y,
           angle: baseA - 0.65,
-          angularVel: 0.72,
-          timer: 1.8,
+          angularVel: b.phase === 2 ? 0.85 : 0.72,
+          timer: 1.85,
           color: '#3be8d1'
         };
         audio.play('laser');
